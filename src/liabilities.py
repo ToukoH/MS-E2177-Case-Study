@@ -8,16 +8,16 @@ class Liabilities:
         self.guaranteed_rate = guaranteed_rate
         self.util_dependencies = util_dependencies
 
-    def npv_liabilities(rf, rg, discount_rates=None, S = 100000):
-    #rf is a list of the risk free rates
-    #rg is the guaranteed rate
+    def npv_liabilities(self, discount_rates=None, S = 100000):
+    #self.market_rate is a list of the risk free rates
+    #self.guaranteed_rate is the guaranteed rate
     
-        T = len(rf)
+        T = len(self.market_rate)
         cf = []
         
         #calculate the cashflows
         for t in range(T):
-            r = max(rf[t], rg)
+            r = max(self.market_rate[t], self.guaranteed_rate)
             
             if t<(T-1):
                 cf.append(0.01*S) #1% probability of death
@@ -36,7 +36,7 @@ class Liabilities:
                     d_i = 1
                     d.append(d_i)
                 else:
-                    d_i = d[i-1]/(1+rf[i-1])
+                    d_i = d[i-1]/(1+self.market_rate[i-1])
                     d.append(d_i)
         
         #print(d)

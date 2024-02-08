@@ -12,6 +12,6 @@ class Assets:
     def method_for_concluding_hedging_strategy(self):
         pass
 
-    def npv_assets(self):
-        npv = self.hedging_product.fixed_coupon_bond()
+    def npv_assets(self, S):
+        npv = self.hedging_product.fixed_coupon_bond(S=S)
         return npv
