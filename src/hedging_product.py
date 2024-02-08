@@ -12,7 +12,7 @@ class HedgingProduct:
         F: face value
         """
 
-        cash_flows = [(coupon * F) / (self.discount_rates[i]) for i in self.discount_rates] + [F/self.discount_rates[-1]]
+        cash_flows = [(coupon * F) / (discount_rate) for discount_rate in self.discount_rates] + [F/self.discount_rates[-1]]
         return S * cash_flows
     
     def variable_coupon_bond(self, F=100, S=1):
@@ -23,6 +23,6 @@ class HedgingProduct:
         F: face value
         """
 
-        cash_flows = [(self.rates[idx] * F) / (self.discount_rates[i]) for idx, i in enumerate(self.discount_rates)] + [F/self.discount_rates[-1]]
+        cash_flows = [(self.rates[idx] * F) / (discount_rate) for idx, discount_rate in enumerate(self.discount_rates)] + [F/self.discount_rates[-1]]
         return S * cash_flows
 
