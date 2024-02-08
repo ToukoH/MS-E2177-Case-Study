@@ -1,4 +1,7 @@
+<<<<<<< Updated upstream
 from hedging_product import HedgingProduct
+=======
+>>>>>>> Stashed changes
 from dataclasses import dataclass
 
 @dataclass
