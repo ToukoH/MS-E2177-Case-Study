@@ -1,12 +1,9 @@
-<<<<<<< Updated upstream
 from hedging_product import HedgingProduct
-=======
->>>>>>> Stashed changes
 from dataclasses import dataclass
 
 @dataclass
 class Assets:
-    def __init__(self, policy_holder, policy_provider, hedging_products, liabilities_dependencies):
+    def __init__(self, policy_holder, policy_provider, hedging_products: HedgingProduct, liabilities_dependencies):
         self.policy_holder = policy_holder
         self.policy_provider = policy_provider
         self.hedging_products = hedging_products
@@ -15,5 +12,6 @@ class Assets:
     def method_for_concluding_hedging_strategy(self):
         pass
 
-    def mock_assets_method(self):
-        pass
+    def npv_assets(self):
+        npv = self.hedging_product.fixed_coupon_bond()
+        return npv
