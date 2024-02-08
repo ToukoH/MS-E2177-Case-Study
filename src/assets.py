@@ -3,15 +3,15 @@ from dataclasses import dataclass
 
 @dataclass
 class Assets:
-    def __init__(self, policy_holder, policy_provider, hedging_products: HedgingProduct, liabilities_dependencies):
-        self.policy_holder = policy_holder
-        self.policy_provider = policy_provider
-        self.hedging_products = hedging_products
-        self.liabilities_dependencies = liabilities_dependencies
+    def __init__(self, S = 100000):
+        """
+        S: size of the asset position
+        """
+        self.S = S
 
-    def method_for_concluding_hedging_strategy(self):
-        pass
+    def npv_assets(self, market_rates, discount_rates):
+        hedging_products = HedgingProduct(market_rates, discount_rates)
 
-    def npv_assets(self, S):
-        npv = self.hedging_product.fixed_coupon_bond(S=S)
+        npv = hedging_products.fixed_coupon_bond(self.S) # NPV is only one fixed coupon bond right now
+
         return npv

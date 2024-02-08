@@ -1,6 +1,6 @@
 class HedgingProduct:
     
-    def __init__(self, rates, discount_rates=None):
+    def __init__(self, rates, discount_rates):
         self.rates = rates
         self.discount_rates = discount_rates
 
