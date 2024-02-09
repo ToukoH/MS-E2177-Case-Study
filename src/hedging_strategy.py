@@ -66,8 +66,8 @@ class HedgingStrategy:
         difference = asset_npv_mean - liability_npv_mean
         return abs(difference)
     
-    def optimize_mean_difference(self): 
+    def optimize_mean_difference(self, first_guess=10000): 
         # Minimize the difference between mean of assets and mean of liabilities
-        x_0 = [100000]
+        x_0 = [first_guess]
         res = minimize(self.match_means, x_0)
         return res.x
