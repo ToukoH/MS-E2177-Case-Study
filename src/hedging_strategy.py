@@ -10,13 +10,13 @@ from scipy.optimize import minimize
 
 @dataclass
 class HedgingStrategy:
-    def __init__(self, data: Utils, guaranteed_rate, S_liabilities):
+    def __init__(self, data, guaranteed_rate, S_liabilities):
         """
         data: Data received from Fennia, simulation data only right now
         guaranteed_rate: quaranteed rate
         """
         self.guaranteed_rate = guaranteed_rate
-        self.data = data.simulation_data
+        self.data = data
         self.S_liabilities = S_liabilities
 
     def calculate_npvs(self, S_assets):
@@ -27,7 +27,7 @@ class HedgingStrategy:
         assets = Assets(S_assets)
         liabilities = Liabilities(self.guaranteed_rate, self.S_liabilities)
         
-        trials = self.data['Trial'][-1]
+        trials = self.data['Trial'].iloc[-1]
         split_data = np.split(self.data, trials) # Data split into trials, each of which has NPV calculated
 
         a_npv_list = []
@@ -64,10 +64,12 @@ class HedgingStrategy:
         a_npv_list, l_npv_list = self.calculate_npvs(S_assets)
         asset_npv_mean, liability_npv_mean = self.calculate_means(a_npv_list, l_npv_list)
         difference = asset_npv_mean - liability_npv_mean
+        print(abs(difference))
         return abs(difference)
     
     def optimize_mean_difference(self, first_guess=10000): 
+        print("Optimization started.")
         # Minimize the difference between mean of assets and mean of liabilities
         x_0 = [first_guess]
-        res = minimize(self.match_means, x_0)
-        return res.x
+        res = minimize(self.match_means, x_0, tol=0.5)
+        return res.x[0] # returns the size of the asset portfolio

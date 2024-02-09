@@ -20,7 +20,7 @@ class Liabilities:
         
         #calculate the cashflows
         for t in range(T):
-            r = max(market_rates[t], self.guaranteed_rate)
+            r = max(market_rates.iloc[t], self.guaranteed_rate)
             
             if t<(T-1):
                 cf.append(0.01*self.S) #1% probability of death

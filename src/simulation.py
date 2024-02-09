@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from hedging_strategy import HedgingStrategy
 from matplotlib import pyplot
+import numpy as np
 
 @dataclass
 class Simulation:
@@ -9,9 +10,18 @@ class Simulation:
 
     def plot_optimal_results(self):
         asset_size = self.hedging_strategy.optimize_mean_difference()
+        print(f"Optimal asset size is: {asset_size}")
         a_npv_list, l_npv_list = self.hedging_strategy.calculate_npvs(asset_size)
-        pyplot.bar(a_npv_list, alpha=0.5, label='Asset NPVs')
-        pyplot.bar(l_npv_list, alpha=0.5, label='Liability NPVs')
+        print("NPVs calculated.")
+        min_npv = min(a_npv_list + l_npv_list)
+        max_npv = max(a_npv_list + l_npv_list)
+
+        print(f"Minimum NPV: {min_npv}")
+        print(f"Maximum NPV: {max_npv}")
+
+        bins = np.linspace(min_npv, max_npv, 1000)
+        pyplot.hist(a_npv_list, bins, alpha=0.5, label='Asset NPVs')
+        pyplot.hist(l_npv_list, bins, alpha=0.5, label='Liability NPVs')
         pyplot.legend(loc='upper right')
         pyplot.show()
 
