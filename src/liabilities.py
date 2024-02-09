@@ -3,15 +3,14 @@ from dataclasses import dataclass
 
 @dataclass
 class Liabilities:
-    def __init__(self, guaranteed_rate, S = 100000):
+    def __init__(self, guaranteed_rate):
         """
         guaranteed_rate: guaranteed_rate
         S: size of the liability position
         """
         self.guaranteed_rate = guaranteed_rate
-        self.S = S
 
-    def npv_liabilities(self, market_rates, discount_rates):
+    def npv_liabilities(self, market_rates, discount_rates, S):
     #self.market_rates is a list of the risk free rates
     #self.guaranteed_rate is the guaranteed rate
     
@@ -23,10 +22,10 @@ class Liabilities:
             r = max(market_rates.iloc[t], self.guaranteed_rate)
             
             if t<(T-1):
-                cf.append(0.01*self.S) #1% probability of death
-                S = 0.99*self.S*(1+r)
+                cf.append(0.01*S) #1% probability of death
+                S = 0.99*S*(1+r)
             else:
-                cf.append(self.S)
+                cf.append(S)
         
         
         #calculate the discount rates if not provided

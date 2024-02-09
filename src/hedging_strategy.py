@@ -15,8 +15,8 @@ class HedgingStrategy:
         data: Data received from Fennia, simulation data only right now
         guaranteed_rate: quaranteed rate
         """
-        self.guaranteed_rate = guaranteed_rate
         self.data = data
+        self.guaranteed_rate = guaranteed_rate
         self.S_liabilities = S_liabilities
 
     def calculate_npvs(self, S_assets):
@@ -25,7 +25,7 @@ class HedgingStrategy:
         """
 
         assets = Assets(S_assets)
-        liabilities = Liabilities(self.guaranteed_rate, self.S_liabilities)
+        liabilities = Liabilities(self.guaranteed_rate)
         
         trials = self.data['Trial'].iloc[-1]
         split_data = np.split(self.data, trials) # Data split into trials, each of which has NPV calculated
@@ -37,7 +37,7 @@ class HedgingStrategy:
             market_rates    = subset['SpotRate1'] # Using forecasted spot rates as the market rates
             discount_rates  = subset['CashTotalReturnIndex']
 
-            npv_liabilities = liabilities.npv_liabilities(market_rates, discount_rates)
+            npv_liabilities = liabilities.npv_liabilities(market_rates, discount_rates, self.S_liabilities)
             npv_assets      = assets.npv_assets(market_rates, discount_rates)
 
             a_npv_list.append(sum(npv_assets))
