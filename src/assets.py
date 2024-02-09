@@ -1,5 +1,6 @@
 from hedging_product import HedgingProduct
 from dataclasses import dataclass
+import numpy
 
 @dataclass
 class Assets:
