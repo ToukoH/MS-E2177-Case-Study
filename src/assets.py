@@ -1,14 +1,16 @@
 from hedging_product import HedgingProduct
 from dataclasses import dataclass
-import numpy
+import numpy as np
 
 @dataclass
 class Assets:
-    def __init__(self, S = 100000):
+    def __init__(self, s=None):
         """
         S: size of the asset position
         """
-        self.S = S
+        if s is None:
+            s = np.zeros(HedgingProduct.ASSET_TYPES)
+        self.s = s
 
     def npv_assets(self, market_rates, discount_rates):
         hedging_products = HedgingProduct(market_rates, discount_rates)

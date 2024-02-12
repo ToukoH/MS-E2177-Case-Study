@@ -1,10 +1,11 @@
 class HedgingProduct:
+    ASSET_TYPES = 2
     
     def __init__(self, rates, discount_rates):
         self.rates = rates
         self.discount_rates = discount_rates
 
-    def fixed_coupon_bond(self, coupon=0.05, F=100, S = 1):
+    def fixed_coupon_bond(self, coupon=0.05, F=100, S=1):
         """
         s: amount of bonds bought
         t: time to maturity in years
