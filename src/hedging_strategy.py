@@ -30,18 +30,18 @@ class HedgingStrategy:
         trials = self.data['Trial'].iloc[-1]
         split_data = np.split(self.data, trials) # Data split into trials, each of which has NPV calculated
 
-        a_npv_list = []
-        l_npv_list = []
+        a_npv_list = np.zeros(len(split_data))
+        l_npv_list = np.zeros(len(split_data))
         
-        for subset in split_data: # Loop through the split data
+        for idx, subset in enumerate(split_data): # Loop through the split data
             market_rates    = subset['SpotRate1'] # Using forecasted spot rates as the market rates
             discount_rates  = subset['CashTotalReturnIndex']
 
             npv_liabilities = liabilities.npv_liabilities(market_rates, discount_rates, self.S_liabilities)
             npv_assets      = assets.npv_assets(market_rates, discount_rates)
 
-            a_npv_list.append(sum(npv_assets))
-            l_npv_list.append(sum(npv_liabilities))
+            a_npv_list[idx] = sum(npv_assets)
+            l_npv_list[idx] = sum(npv_liabilities)
 
         return a_npv_list, l_npv_list
     
@@ -51,10 +51,19 @@ class HedgingStrategy:
         l_npv_list:       list of liability NPVs
         """
 
-        asset_npv_mean      = sum(a_npv_list) / len(a_npv_list)
-        liability_npv_mean  = sum(l_npv_list) / len(l_npv_list)
+        asset_npv_mean      = np.mean(a_npv_list)
+        liability_npv_mean  = np.mean(l_npv_list)
 
         return asset_npv_mean, liability_npv_mean
+
+    def optimize_portfolio(self):
+        res = minimize(self.portfolio_penalty())
+        return res.x[0]
+
+    def portfolio_penalty(self, s):
+        a_npv_list, l_npv_list = self.calculate_npvs(s)
+        penalty = - np.mean(np.minimum(a_npv_list - l_npv_list, np.zeros(a_npv_list.shape)))
+        return penalty
     
     def match_means(self, S_assets):
         """
