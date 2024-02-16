@@ -10,7 +10,7 @@ from scipy.optimize import minimize
 
 @dataclass
 class HedgingStrategy:
-    def __init__(self, data, guaranteed_rate, S_liabilities):
+    def __init__(self, data, guaranteed_rate, hedging_product, S_liabilities):
         """
         data: Data received from Fennia, simulation data only right now
         guaranteed_rate: quaranteed rate
