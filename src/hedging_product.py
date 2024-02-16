@@ -16,7 +16,7 @@ class HedgingProduct:
         bond = VariableCouponBond(self.rates, F, self.discount_rates, S)
         self.products.append(bond)
 
-    def add_swaption():
+    def add_swaption(self):
         swaption = Swaption()
         self.products.append(swaption)
 
