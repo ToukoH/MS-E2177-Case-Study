@@ -1,28 +1,28 @@
+from Products.fixed_rate_coupon import FixedCouponBond
+from Products.variable_rate_coupon import VariableCouponBond
+from Products.swaption import Swaption
+
+
 class HedgingProduct:
-    
     def __init__(self, rates, discount_rates):
         self.rates = rates
         self.discount_rates = discount_rates
+        self.products = []
 
-    def fixed_coupon_bond(self, coupon=0.05, F=100, S = 1):
-        """
-        s: amount of bonds bought
-        t: time to maturity in years
-        coupon: coupon
-        F: face value
-        """
+    def add_fixed_coupon_bond(self, coupon=0.05, F=100, S=1):
+        bond = FixedCouponBond(coupon, F, self.discount_rates, S)
+        self.products.append(bond)
 
-        cash_flows = [(coupon * F) / (discount_rate) for discount_rate in self.discount_rates] + [F/self.discount_rates.iloc[-1]]
-        return S * cash_flows
-    
-    def variable_coupon_bond(self, F=100, S=1):
-        """
-        s: amount of bonds bought
-        t: time to maturity in years
-        coupon: coupon
-        F: face value
-        """
+    def add_variable_coupon_bond(self, F=100, S=1):
+        bond = VariableCouponBond(self.rates, F, self.discount_rates, S)
+        self.products.append(bond)
 
-        cash_flows = [(self.rates[idx] * F) / (discount_rate) for idx, discount_rate in enumerate(self.discount_rates)] + [F/self.discount_rates[-1]]
-        return S * cash_flows
+    def add_swaption(self):
+        swaption = Swaption()
+        self.products.append(swaption)
 
+    def calculate_cash_flows(self):
+        results = []
+        for product in self.products:
+            results.append(product.calculate_payoff())
+        return results
