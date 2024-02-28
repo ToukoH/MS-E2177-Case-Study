@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Swaption:
     def __init__(self, notional, strike_rate, maturity, underlying_swap_years):
         self.notional = notional

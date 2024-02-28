@@ -2,6 +2,7 @@ from Products.fixed_rate_coupon import FixedCouponBond
 from Products.variable_rate_coupon import VariableCouponBond
 from Products.swaption import Swaption
 
+
 class HedgingProduct:
     def __init__(self, rates, discount_rates):
         self.rates = rates
