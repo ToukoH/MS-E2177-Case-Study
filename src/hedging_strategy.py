@@ -19,6 +19,8 @@ class HedgingStrategy:
         self.guaranteed_rate = guaranteed_rate
         self.S_liabilities = S_liabilities
 
+        self.npv_asset_liability_list = pd.DataFrame()
+
     def calculate_npvs(self, S_assets):
         """
         S_assets:       size of the asset position
@@ -32,16 +34,25 @@ class HedgingStrategy:
 
         a_npv_list = []
         l_npv_list = []
+        self.npv_asset_liability_list = pd.DataFrame()
         
-        for subset in split_data: # Loop through the split data
+        for idx, subset in enumerate(split_data): # Loop through the split data
             market_rates    = subset['SpotRate1'] # Using forecasted spot rates as the market rates
             discount_rates  = subset['CashTotalReturnIndex']
 
-            npv_liabilities = liabilities.npv_liabilities(market_rates, discount_rates, self.S_liabilities)
-            npv_assets      = assets.npv_assets(market_rates, discount_rates)
+            pv_liabilities = liabilities.npv_liabilities(market_rates, discount_rates, self.S_liabilities)
+            pv_assets      = assets.npv_assets(market_rates, discount_rates)
 
-            a_npv_list.append(sum(npv_assets))
-            l_npv_list.append(sum(npv_liabilities))
+            #print(len(pv_assets))
+            
+            #print(len(pv_liabilities))
+            self.npv_asset_liability_list[f'PVs_liabilities_{idx}'] = pv_liabilities
+            self.npv_asset_liability_list[f'PVs_assets_{idx}'] = pv_assets
+            self.npv_asset_liability_list[f'market_rates_{idx}'] = market_rates
+            self.npv_asset_liability_list[f'discount_rates_{idx}'] = discount_rates
+
+            a_npv_list.append(sum(pv_assets))
+            l_npv_list.append(sum(pv_liabilities))
 
         return a_npv_list, l_npv_list
     

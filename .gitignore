@@ -2,3 +2,4 @@ data/
 venv/
 .ipynb_checkpoints/
 /src/__pycache__
+npvs_of_assets_and_liabities.csv

@@ -10,7 +10,7 @@ class Liabilities:
         """
         self.guaranteed_rate = guaranteed_rate
 
-    def npv_liabilities(self, market_rates, discount_rates, S):
+    def npv_liabilities(self, market_rates, discount_rates, S=10_000):
     #self.market_rates is a list of the risk free rates
     #self.guaranteed_rate is the guaranteed rate
     

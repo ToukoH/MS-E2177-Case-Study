@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from hedging_strategy import HedgingStrategy
 from matplotlib import pyplot
 import numpy as np
+import pandas as pd
 
 @dataclass
 class Simulation:
@@ -19,6 +20,8 @@ class Simulation:
 
         print(f"Minimum NPV: {min_npv}")
         print(f"Maximum NPV: {max_npv}")
+
+        self.hedging_strategy.npv_asset_liability_list.to_csv('npvs_of_assets_and_liabilities.csv')      
 
         #bins = np.linspace(min(subtracted_npv), max(subtracted_npv), 1000)
         bins = np.linspace(min_npv, max_npv, 1000)
