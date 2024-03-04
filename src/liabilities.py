@@ -50,3 +50,18 @@ class Liabilities:
         cash_flows = [x * y for x, y in zip(cf, d)]
         
         return cash_flows
+    
+    def calculate_cashflows(self, market_rates, S):
+        T = len(market_rates)
+        cf = []
+        
+        #calculate the cashflows
+        for t in range(T):
+            r = max(market_rates.iloc[t], self.guaranteed_rate)
+            
+            if t<(T-1):
+                cf.append(0.01*S) #1% probability of death
+                S = 0.99*S*(1+r)
+            else:
+                cf.append(S)
+        return cf
