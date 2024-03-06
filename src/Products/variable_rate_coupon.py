@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class VariableCouponBond:
     def __init__(self, rates, F, discount_rates, S=1):
         self.rates = rates
