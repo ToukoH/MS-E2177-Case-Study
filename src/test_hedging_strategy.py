@@ -18,7 +18,7 @@ HP.add_fixed_coupon_bond()
 
 data = data_processing("/Users/matveizhukov/Documents/fenia_2024/MS-E2177-Case-Study/20231231_Hf_output.csv")
 
-HS = HedgingStrategy(data,0.05,HP,10_000)
+HS = HedgingStrategy(data,0.05, HP ,10_000)
 
 x = HS.optimize_cashflow_difference(10000)
 
