@@ -1,52 +1,22 @@
-from dataclasses import dataclass
+from contract import Contract
 
-
-@dataclass
 class Liabilities:
-    def __init__(self, guaranteed_rate):
-        """
-        guaranteed_rate: guaranteed_rate
-        S: size of the liability position
-        """
-        self.guaranteed_rate = guaranteed_rate
+    def __init__(self):
+        self.contracts = []
 
-    def npv_liabilities(self, market_rates, discount_rates, S):
-    #self.market_rates is a list of the risk free rates
-    #self.guaranteed_rate is the guaranteed rate
-    
+    def add_contract(self, contract: Contract):
+        self.contracts.append(contract)
+
+    def npv_liabilities(self, market_rates, discount_rates):
         T = len(market_rates)
-        cf = []
-        
-        #calculate the cashflows
-        for t in range(T):
-            r = max(market_rates.iloc[t], self.guaranteed_rate)
+        aggregate_cf = [0] * T
+
+        for contract in self.contracts:
+            cf = contract.calculate_cashflows(market_rates)
             
-            if t<(T-1):
-                cf.append(0.01*S) #1% probability of death
-                S = 0.99*S*(1+r)
-            else:
-                cf.append(S)
-        
-        
-        #calculate the discount rates if not provided
-        #if discount_rates is not None:
-        d = discount_rates
-
-        """
-        else:
-            d = []
             for i in range(T):
-                if i < 1:
-                    d_i = 1
-                    d.append(d_i)
-                else:
-                    d_i = d[i-1]/(1+self.market_rates[i-1])
-                    d.append(d_i)
-        """
+                aggregate_cf[i] += cf[i]
 
-        
-        #print(d)
-        #print(cf)
-        cash_flows = [x * y for x, y in zip(cf, d)]
-        
-        return cash_flows
+        discounted_cf = [cf * d for cf, d in zip(aggregate_cf, discount_rates)]
+
+        return discounted_cf
