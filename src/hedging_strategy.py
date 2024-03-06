@@ -20,21 +20,34 @@ class HedgingStrategy:
         self.S_liabilities = S_liabilities
         self.hp = hedging_product
         self.products = self.hp.products
+        self.market_rates_list = []
 
+    def split_data(self):
+        trials = self.data['Trial'].iloc[-1]
+        split_data = np.split(self.data, trials)  # Data split into trials, each of which has NPV calculated
+
+        for subset in split_data:  # Loop through the split data
+            market_rates = subset['SpotRate1']  # Using forecasted spot rates as the market rates
+            self.market_rates_list.append(market_rates)
 
     def match_cashflows(self, x):
         # Need to know the liabilities cashflow!!!
-        liabilities_cashflow = None
-        assets_cashflow = np.multiply(x, np.array([product.calulate_payoff for product in self.products]))
-        return np.linalg.norm(assets_cashflow - liabilities_cashflow)
+        accumulated_result = 0
+        for market_rates in self.market_rates_list:
+            l = Liabilities(self.guaranteed_rate)
+            liabilities_cashflow = l.calculate_cashflows(market_rates, self.S_liabilities)
+            assets_cashflow = np.multiply(x, np.array([product.calculate_payoff() for product in self.products]))
+            accumulated_result += np.linalg.norm(assets_cashflow - liabilities_cashflow)
+        return accumulated_result
 
-    def optimize_mean_difference(self, zero_time_npv):
+    def optimize_cashflow_difference(self, zero_time_npv):
+        self.split_data()
         print("Optimization started.")
         x_0 = np.zeros(len(self.products))
         x_0 += zero_time_npv/len(x_0)
         constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
         res = minimize(self.match_cashflows, x_0, tol=0.5)
-        return res.x[0]  # returns the size of the asset portfolio
+        return res.x  # returns the size of the asset portfolio
 
 # BELOW NOT IN USE
 
