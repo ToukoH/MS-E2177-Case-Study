@@ -14,9 +14,9 @@ class Contract:
             r = max(market_rates.iloc[t], self.guaranteed_rate)
 
             if t < (T - 1):
-                cf.append(0.01 * S)  # 1% probability of death
-                S = 0.99 * S * (1 + r)
+                cf.append(0)  # no cashflow
+                S = S * (1 + r)
             else:
-                cf.append(S)
+                cf.append(S) # final cashflow
 
         return cf
