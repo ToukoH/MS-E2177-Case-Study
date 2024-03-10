@@ -3,6 +3,7 @@ from liabilities import Liabilities
 from hedging_product import HedgingProduct
 from assets import Assets
 from utils import Utils
+from contract import Contract
 import pandas as pd
 import numpy as np
 from scipy.optimize import minimize, LinearConstraint
@@ -34,8 +35,10 @@ class HedgingStrategy:
         # Need to know the liabilities cashflow!!!
         accumulated_result = 0
         for market_rates in self.market_rates_list:
-            l = Liabilities(self.guaranteed_rate)
-            liabilities_cashflow = l.calculate_cashflows(market_rates, self.S_liabilities)
+            cont = Contract(10000, 0.035) # inserting manually
+            l = Liabilities()
+            l.add_contract(cont)
+            liabilities_cashflow = cont.calculate_cashflows(market_rates) # this has to be fixed for case with multiple contracts
             assets_cashflow = np.multiply(x, np.array([product.calculate_payoff() for product in self.products]))
             accumulated_result += np.linalg.norm(assets_cashflow - liabilities_cashflow)
         return accumulated_result

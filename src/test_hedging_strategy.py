@@ -16,7 +16,7 @@ def data_processing(datapath: str) -> pd.DataFrame:
 HP = HedgingProduct()
 HP.add_fixed_coupon_bond()
 
-data = data_processing("/Users/matveizhukov/Documents/fenia_2024/MS-E2177-Case-Study/20231231_Hf_output.csv")
+data = data_processing("/Users/Joelv/Desktop/yliop/Fennia Case/20231231_Hf_output.csv")
 
 HS = HedgingStrategy(data,0.05, HP ,10_000)
 

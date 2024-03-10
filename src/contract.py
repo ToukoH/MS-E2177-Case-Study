@@ -2,8 +2,9 @@ from dataclasses import dataclass
 
 @dataclass
 class Contract:
-    guaranteed_rate: float
-    S: float 
+    def __init__(self, S, guaranteed_rate):
+        self.S = S
+        self.guaranteed_rate = guaranteed_rate
 
     def calculate_cashflows(self, market_rates):
         T = len(market_rates)
