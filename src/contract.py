@@ -5,11 +5,14 @@ import numpy as np
 
 @dataclass
 class Contract:
-    def __init__(self, size, guaranteed_rate, start_time=0, maturity=10):
+    def __init__(self, size, guaranteed_rate=0.035, start_time=0, maturity=10):
         self.size = size
         self.guaranteed_rate = guaranteed_rate
         self.start_time = start_time
         self.maturity = maturity
+
+    def __repr__(self):
+        return f"Contract(size={self.size}, maturity={self.maturity})"
 
     def calculate_cashflows(self, market_rates):
         """
