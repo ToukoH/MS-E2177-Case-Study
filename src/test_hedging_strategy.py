@@ -23,7 +23,7 @@ for i in range(1, 11):
 L = Liabilities()
 n_contracts = 100
 rng = np.random.default_rng(97584730930274884604721697427988122108)  # DO NOT CHANGE!!!
-maturities = rng.integers(1, 10, n_contracts)
+maturities = rng.integers(1, 11, n_contracts)
 sizes = rng.integers(1000, 50000, n_contracts)
 for i in range(n_contracts):
     contract = Contract(size=sizes[i], maturity=maturities[i])
@@ -33,7 +33,7 @@ for i in range(n_contracts):
 
 data = data_processing("/Users/matveizhukov/Documents/fenia_2024/MS-E2177-Case-Study/20231231_Hf_output.csv")
 
-HS = HedgingStrategy(data, HP, L, 15) # DO NOT MAKE n_of_simulations big
+HS = HedgingStrategy(data, HP, L, 10)  # DO NOT MAKE  n_of_simulations big
 
 x = HS.optimize_cashflow_difference()
 

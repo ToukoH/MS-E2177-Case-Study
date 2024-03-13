@@ -12,8 +12,13 @@ class HedgingStrategy:
                  liabilities: Liabilities,
                  n_of_simulations=None):
         """
-        data: Data received from Fennia, simulation data only right now
-        guaranteed_rate: guaranteed rate
+
+        Parameters
+        ----------
+        data --- data describing all simulations
+        hedging_product --- an instance of the HedgingProduct class
+        liabilities --- an instance of the Liabilities class
+        n_of_simulations --- number of the simulations paths that we consider
         """
         self.data = data
 
@@ -38,10 +43,31 @@ class HedgingStrategy:
             self.market_rates_list.append(market_rates)
 
     @staticmethod
-    def cashflows_target_function(cashflows):
-        return np.linalg.norm(cashflows)
+    def cashflows_target_function(cashflow):
+        """
+        This is a function that we want to optimize. Basically, if we have a resulting cashflow,
+        this is the measure of it being good or bad.
+        Parameters
+        ----------
+        cashflow --- resulting cashflow wrt Fennia
+
+        Returns
+        -------
+        The resulting cashflow score.
+        """
+        return np.linalg.norm(cashflow)
 
     def match_cashflows(self, x):
+        """
+        This is a function, calculating the average cashflow target function among simulations.
+        ----------
+        x --- distribution of assets that we buy
+
+        Returns
+        -------
+        average cashflow score.
+
+        """
         accumulated_result = 0
         for market_rates in self.market_rates_list[:self.n_of_simulations]:
             kwargs = {'t_end': len(market_rates),
@@ -50,12 +76,14 @@ class HedgingStrategy:
             assets_cashflow = x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products]))
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             accumulated_result += self.cashflows_target_function(resulting_cashflow)
-        return accumulated_result
+        return accumulated_result / self.n_of_simulations
 
     def optimize_cashflow_difference(self):
         self.split_data()
         if self.n_of_simulations is None:
             self.n_of_simulations = len(self.market_rates_list)
+        else:
+            self.n_of_simulations = min(self.n_of_simulations, len(self.market_rates_list))
         print("Optimization started.")
         x_0 = np.zeros(len(self.products))
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
@@ -64,6 +92,17 @@ class HedgingStrategy:
         return res.x  # returns the size of the asset portfolio
 
     def calculate_optimal_average_cashflows(self, x):
+        """
+        This is a function that produces and returns the average liabilities and assets cashflows
+        for a given asset distribution x.
+        Parameters
+        ----------
+        x --- asset distribution
+
+        Returns
+        -------
+        Average cashflows of liabilities and assets as a tuple.
+        """
         self.liabilities_cashflows_list = []
         self.assets_cashflows_list = []
         for market_rates in self.market_rates_list[:self.n_of_simulations]:
