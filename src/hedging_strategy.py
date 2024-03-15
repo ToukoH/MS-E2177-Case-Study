@@ -72,11 +72,11 @@ class HedgingStrategy:
         for market_rates in self.market_rates_list[:self.n_of_simulations]:
             kwargs = {'t_end': len(market_rates),
                       'market_rates': market_rates}
-            liabilities_cashflow = self.liabilities.calculate_cashflows(market_rates)
-            assets_cashflow = x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products]))
+            liabilities_cashflow = self.liabilities.calculate_cashflows(market_rates)  # No need to calculate every time!
+            assets_cashflow = x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products])) # No need to calculate every time!
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             accumulated_result += self.cashflows_target_function(resulting_cashflow)
-        return accumulated_result / self.n_of_simulations
+        return accumulated_result
 
     def optimize_cashflow_difference(self):
         self.split_data()
@@ -85,10 +85,12 @@ class HedgingStrategy:
         else:
             self.n_of_simulations = min(self.n_of_simulations, len(self.market_rates_list))
         print("Optimization started.")
+        init_cashflow = np.sum([contract.size for contract in self.contracts])
         x_0 = np.zeros(len(self.products))
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
         bnds = ((0, 1e10) for i in range(len(x_0)))
-        res = minimize(self.match_cashflows, x_0, tol=1)
+        res = minimize(self.match_cashflows, x_0, tol=0.1)
+        print(res)
         return res.x  # returns the size of the asset portfolio
 
     def calculate_optimal_average_cashflows(self, x):

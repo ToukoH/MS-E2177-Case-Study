@@ -28,12 +28,11 @@ sizes = rng.integers(1000, 50000, n_contracts)
 for i in range(n_contracts):
     contract = Contract(size=sizes[i], maturity=maturities[i])
     L.add_contract(contract)
-# print(L.contracts[:5])
 
 
 data = data_processing("/Users/matveizhukov/Documents/fenia_2024/MS-E2177-Case-Study/20231231_Hf_output.csv")
 
-HS = HedgingStrategy(data, HP, L, 10)  # DO NOT MAKE  n_of_simulations big
+HS = HedgingStrategy(data, HP, L, 5)  # DO NOT MAKE  n_of_simulations big
 
 x = HS.optimize_cashflow_difference()
 
