@@ -39,7 +39,8 @@ class HedgingStrategy:
         split_data = np.split(self.data, trials)
 
         for subset in split_data:  # Loop through the split data
-            market_rates = subset['SpotRate1']  # Using forecasted spot rates as the market rates
+            #market_rates = subset['SpotRate1']  # Using forecasted spot rates as the market rates
+            market_rates = subset['ESG.Economies.EUR_DEM.NominalYieldCurves.SWAP.SpotRate(Govt; 1; 3)'] 
             self.market_rates_list.append(market_rates)
 
     @staticmethod
