@@ -15,5 +15,5 @@ class VariableCouponBond:
         cashflows[self.start_time] = - self.price
         market_rates_slice = market_rates[self.start_time + 1: self.end_time]
         cashflows[self.start_time + 1: self.end_time] = self.face_value * market_rates_slice
-        cashflows[self.start_time + self.maturity] = self.face_value
+        cashflows[self.start_time + self.maturity] = self.face_value + market_rates[self.end_time]
         return cashflows

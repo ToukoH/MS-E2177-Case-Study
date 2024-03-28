@@ -13,6 +13,6 @@ class FixedCouponBond:
         cashflows = np.zeros(t_end + 1)
         cashflows[self.start_time] = - self.price
         cashflows[self.start_time + 1: self.start_time + self.maturity] = self.face_value * self.coupon
-        cashflows[self.start_time + self.maturity] = self.face_value
+        cashflows[self.start_time + self.maturity] = self.face_value + self.face_value * self.coupon
         return cashflows
 
