@@ -32,9 +32,8 @@ for i in range(n_contracts):
 
 #data = data_processing("/Users/Joelv/Desktop/yliop/Fennia Case/20231231_Hf_output.csv")
 data = data_processing("/Users/Joelv/Desktop/yliop/Fennia Case/Example Output EUR Swap Spot 2023Q4 updated.csv")
-print(data.head())
 
-HS = HedgingStrategy(data, HP, L, 5)  # DO NOT MAKE  n_of_simulations big
+HS = HedgingStrategy(data, HP, L, 30)  # DO NOT MAKE  n_of_simulations big
 
 x = HS.optimize_cashflow_difference()
 

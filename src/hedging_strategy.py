@@ -30,11 +30,15 @@ class HedgingStrategy:
 
         self.n_of_simulations = n_of_simulations
 
-        self.market_rates_list = []
-        self.liabilities_cashflows_list = None
-        self.assets_cashflows_list = None
+        self.market_rates_list = [] # calculated in _split_data call
+
+        self.liabilities_cashflows_list = []
+        self.products_cashflows_list = [] # cashflows for different possible products. Asset cashflows can be calculated with this and x
+
+        self.assets_cashflows_list = [] 
 
         self._split_data()
+        self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
     def _split_data(self):
         trials = self.data['Trial'].iloc[-1]
@@ -72,11 +76,10 @@ class HedgingStrategy:
 
         """
         accumulated_result = 0
-        for market_rates in self.market_rates_list[:self.n_of_simulations]:
-            kwargs = {'t_end': len(market_rates),
-                      'market_rates': market_rates}
-            liabilities_cashflow = self.liabilities.calculate_cashflows(market_rates)  # No need to calculate every time!
-            assets_cashflow = x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products])) # No need to calculate every time!
+        for i in range(self.n_of_simulations):
+            liabilities_cashflow = self.liabilities_cashflows_list[i] 
+            assets_cashflow = x.dot(self.products_cashflows_list[i]) 
+            self.assets_cashflows_list.append(assets_cashflow)
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             accumulated_result += self.cashflows_target_function(resulting_cashflow)
         return accumulated_result
@@ -117,5 +120,21 @@ class HedgingStrategy:
         self.liabilities_cashflows_list = np.array(self.liabilities_cashflows_list)
         self.assets_cashflows_list = np.array(self.assets_cashflows_list)
         return np.average(self.liabilities_cashflows_list, axis=0), np.average(self.assets_cashflows_list, axis=0)
+    
+    def _calculate_liab_product_cashflows(self):
+        """
+        This is a function, calculating the liability and product cash flow lists.
+        ----------
+
+        """
+        for market_rates in self.market_rates_list[:self.n_of_simulations]:
+            kwargs = {'t_end': len(market_rates),
+                      'market_rates': market_rates}
+            self.liabilities_cashflows_list.append(self.liabilities.calculate_cashflows(market_rates))
+            self.products_cashflows_list.append(np.array([product.calculate_payoff(**kwargs) for product in self.products]))
+
+
+        self.liabilities_cashflows_list = np.array(self.liabilities_cashflows_list)
+        self.products_cashflows_list = np.array(self.products_cashflows_list)
 
 
