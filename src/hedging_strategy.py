@@ -34,7 +34,9 @@ class HedgingStrategy:
         self.liabilities_cashflows_list = None
         self.assets_cashflows_list = None
 
-    def split_data(self):
+        self._split_data()
+
+    def _split_data(self):
         trials = self.data['Trial'].iloc[-1]
         split_data = np.split(self.data, trials)
 
@@ -80,7 +82,6 @@ class HedgingStrategy:
         return accumulated_result
 
     def optimize_cashflow_difference(self):
-        self.split_data()
         if self.n_of_simulations is None:
             self.n_of_simulations = len(self.market_rates_list)
         else:
