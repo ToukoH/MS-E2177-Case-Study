@@ -25,3 +25,9 @@ class HedgingProduct:
         for product in self.products:
             results.append(product.calculate_payoff())
         return results
+    
+    def calculate_npvs(self): # TOUKO DO THIS!!!!
+        results = []
+        for product in self.products:
+            results.append(product.calculate_npv())
+        return results
