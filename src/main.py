@@ -4,16 +4,13 @@ from hedging_product import HedgingProduct
 from liabilities import Liabilities
 from contract import Contract
 import numpy as np
-import secrets
 import matplotlib.pyplot as plt
-
 
 def data_processing(datapath: str) -> pd.DataFrame:
     data = pd.read_csv(datapath, delimiter=";", index_col=False)
     data = data.replace(",", ".", regex=True)
     data = data.apply(pd.to_numeric)
     return data
-
 
 HP = HedgingProduct()
 for i in range(1, 11):
