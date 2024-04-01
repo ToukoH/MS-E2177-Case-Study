@@ -12,6 +12,7 @@ data = data_processing(data_path)
 
 n_contracts = 100
 seed = np.random.default_rng(1) # or 97584730930274884604721697427988122108
+coupon = 0.0
 
 HP = HedgingProduct()
 L = Liabilities()
@@ -21,7 +22,7 @@ maturities = seed.integers(1, 11, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
 
 for i in range(1, 11):
-    HP.add_fixed_coupon_bond(maturity=i, coupon = 0.0) # changed from 0.05 -> 0.0
+    HP.add_fixed_coupon_bond(maturity=i, coupon = coupon)
     HP.add_variable_coupon_bond(maturity=i)
 
 for i in range(n_contracts):
