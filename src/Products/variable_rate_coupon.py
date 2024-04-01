@@ -6,7 +6,6 @@ class VariableCouponBond:
         self.maturity = maturity
         self.face_value = face_value
         self.price = price
-
         self.end_time = self.start_time + self.maturity
 
     def calculate_payoff(self, t_end, market_rates):
