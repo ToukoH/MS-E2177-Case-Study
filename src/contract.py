@@ -43,11 +43,10 @@ class Contract:
 
         return cashflows
 
-    def calculate_npvs(self, market_rates): # LEEVI, DO THIS!!!!!
+    def calculate_npvs(self, market_rates, discount_rates): # LEEVI, DO THIS!!!!!
         """
-        This function calculates cashflows with respect to the market rates and the guaranteed rate.
-        Cashflows are calculated with respect to Fennia, so the cashflow at t = start_time is positive
-        and at t = start_time + maturity is negative.
+        This function calculates the NPV of the cashflows with respect to the market rates and the guaranteed rate.
+
         Parameters
         ----------
         market_rates --- market rates for the whole simulated period [1, t_end]. For a correct answer
@@ -56,18 +55,10 @@ class Contract:
 
         Returns
         -------
-        An array of cashflows for the whole simulated period. It would have two non-zero values.
-        len(cashflows) = len(market_rates) + 1, because cashflows are returned for t in [0, t_end]
-
+        An array of NPVS for the whole simulated period. 
         """
-        cashflows = np.zeros(len(market_rates) + 1)
+        cashflows = self.calculate_cashflows(market_rates)
+        npvs = np.zeros(len(market_rates) + 1)
+        npvs = cashflows * discount_rates
 
-        market_rates_slice = market_rates[self.start_time + 1: self.start_time + self.maturity + 1]
-        guaranteed_rates_slice = np.array([self.guaranteed_rate] * self.maturity)
-        applied_rates = np.maximum(market_rates_slice, guaranteed_rates_slice)
-        total_multiplier = np.prod(applied_rates + 1)
-
-        cashflows[self.start_time] = self.size
-        cashflows[self.start_time + self.maturity] = - self.size * total_multiplier
-
-        return cashflows
+        return npvs
