@@ -30,7 +30,7 @@ class Liabilities:
 
     def calculate_npvs(self, market_rates): # LEEVI DO THIS!!!!!
         """
-        This function calculate the accumulated cashflow of all contracts.
+        This function calculate the accumulated npvs of all contracts.
         Parameters
         ----------
         market_rates --- market rates of a simulation path
@@ -39,7 +39,8 @@ class Liabilities:
         -------
         total cashflow of all contracts
         """
-        accumulated_cashflows = np.zeros(len(market_rates) + 1)
+        accumulated_npvs = np.zeros(len(market_rates) + 1)
+
         for contract in self.contracts:
-            accumulated_cashflows += contract.calculate_cashflows(market_rates)
-        return accumulated_cashflows
+            accumulated_npvs += contract.calculate_cashflows(market_rates)
+        return accumulated_npvs
