@@ -18,7 +18,6 @@ coupon = 0.0
 
 HP = HedgingProduct()
 L = Liabilities()
-HS = HedgingStrategy(data_real, data_rn, HP, L, 100)
 
 maturities = seed.integers(1, 11, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
@@ -31,6 +30,7 @@ for i in range(n_contracts):
     contract = Contract(size=sizes[i], maturity=maturities[i])
     L.add_contract(contract)
 
+HS = HedgingStrategy(data_real, data_rn, HP, L, 100)
 x = HS.optimize_cashflow_difference()
 
 print(x)
