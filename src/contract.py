@@ -43,7 +43,7 @@ class Contract:
 
         return cashflows
 
-    def calculate_npvs(self, market_rates, discount_rates): # LEEVI, DO THIS!!!!!
+    def calculate_npv(self, market_rates_rn_list, discount_rates_rn_list):
         """
         This function calculates the NPV of the cashflows with respect to the market rates and the guaranteed rate.
 
@@ -57,8 +57,28 @@ class Contract:
         -------
         An array of NPVS for the whole simulated period. 
         """
-        cashflows = self.calculate_cashflows(market_rates)
-        npvs = np.zeros(len(market_rates) + 1)
-        npvs = cashflows * discount_rates
+        trials = zip(market_rates_rn_list, discount_rates_rn_list)
+        accumulated_npvs = 0
 
-        return npvs
+        for trial in trials:
+            accumulated_npvs += self.calculate_npv_single_trial(trial)
+
+        return accumulated_npvs / len(trials)
+    
+    def calculate_npv_single_trial(self, trial):
+        """
+        This function calculates the NPV of the cashflows for one single trial.
+
+        Parameters
+        ----------
+        trial --- zipped list with information of risk neutral market rates and discount rates
+
+        Returns
+        -------
+        NPV of this contract on single trial
+        """
+        market_rates_rn, discount_rates_rn = zip(*trial) #unzipping
+        cashflows = self.calculate_cashflows(market_rates_rn)
+        pvs = np.zeros(len(market_rates_rn) + 1)
+        pvs = cashflows * discount_rates_rn
+        return sum(pvs)
