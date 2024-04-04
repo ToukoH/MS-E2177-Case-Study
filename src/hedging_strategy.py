@@ -7,7 +7,7 @@ from scipy.optimize import minimize, LinearConstraint
 
 @dataclass
 class HedgingStrategy:
-    def __init__(self, data,
+    def __init__(self, data_real, data_rn,
                  hedging_product: HedgingProduct,
                  liabilities: Liabilities,
                  n_of_simulations=None):
@@ -15,12 +15,14 @@ class HedgingStrategy:
 
         Parameters
         ----------
-        data --- data describing all simulations
+        data --- real data describing all simulations 
+        data_rn --- risk neutral data describing all simulations 
         hedging_product --- an instance of the HedgingProduct class
         liabilities --- an instance of the Liabilities class
         n_of_simulations --- number of the simulations paths that we consider
         """
-        self.data = data
+        self.data_real = data_real
+        self.data_rn = data_rn
 
         self.hp = hedging_product
         self.products = self.hp.products
@@ -37,17 +39,31 @@ class HedgingStrategy:
 
         self.assets_cashflows_list = [] 
 
+        self.market_rates_rn_list = []
+        self.discount_factors_rn_list = []
+
         self._split_data()
         self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
     def _split_data(self):
-        trials = self.data['Trial'].iloc[-1]
-        split_data = np.split(self.data, trials)
+        # Real data
+        trials = self.data_real['Trial'].iloc[-1]
+        split_data = np.split(self.data_real, trials)
 
-        for subset in split_data:  # Loop through the split data
-            #market_rates = subset['SpotRate1']  # Using forecasted spot rates as the market rates
+        # Risk neutral data
+        trials_rn = self.data_rn['Trial'].iloc[-1]
+        split_data_rn = np.split(self.data_rn, trials_rn)
+
+        for subset in split_data:  # Loop through the split data (real data)
             market_rates = subset['ESG.Economies.EUR_DEM.NominalYieldCurves.SWAP.SpotRate(Govt; 1; 3)'] 
             self.market_rates_list.append(market_rates)
+
+        for subset in split_data_rn: # Loop through the split data (risk neutral data)
+            market_rates_rn = subset['SpotRate1']
+            self.market_rates_rn_list.append(market_rates_rn)
+
+            discount_factors_rn = subset['Deflator']
+            self.discount_factors_rn_list.append(discount_factors_rn)
 
     @staticmethod
     def cashflows_target_function(cashflow):

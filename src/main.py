@@ -7,8 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import data_processing
 
-data_path = "data/Example Output EUR Swap Spot 2023Q4 updated.csv"
-data = data_processing(data_path)
+data_path_real = "data/Example Output EUR Swap Spot 2023Q4 updated.csv"
+data_path_rn = "data/data.csv"
+data_real = data_processing(data_path_real)
+data_rn = data_processing(data_path_rn)
 
 n_contracts = 100
 seed = np.random.default_rng(1) # or 97584730930274884604721697427988122108
@@ -16,7 +18,7 @@ coupon = 0.0
 
 HP = HedgingProduct()
 L = Liabilities()
-HS = HedgingStrategy(data, HP, L, 100)
+HS = HedgingStrategy(data_real, data_rn, HP, L, 100)
 
 maturities = seed.integers(1, 11, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
