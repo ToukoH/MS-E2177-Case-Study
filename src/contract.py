@@ -60,12 +60,12 @@ class Contract:
         trials = zip(market_rates_rn_list, discount_rates_rn_list)
         accumulated_npvs = 0
 
-        for trial in trials:
-            accumulated_npvs += self.calculate_npv_single_trial(trial)
+        for market_rates_rn, discount_rates_rn in trials:
+            accumulated_npvs += self.calculate_npv_single_trial(market_rates_rn, discount_rates_rn)
 
-        return accumulated_npvs / len(trials)
+        return accumulated_npvs / len(market_rates_rn)
     
-    def calculate_npv_single_trial(self, trial):
+    def calculate_npv_single_trial(self, market_rates_rn, discount_rates_rn):
         """
         This function calculates the NPV of the cashflows for one single trial.
 
@@ -77,8 +77,8 @@ class Contract:
         -------
         NPV of this contract on single trial
         """
-        market_rates_rn, discount_rates_rn = zip(*trial) #unzipping
-        cashflows = self.calculate_cashflows(market_rates_rn)
+        #market_rates_rn, discount_rates_rn = zip(*trial) #unzipping
+        cashflows = self.calculate_cashflows(market_rates_rn[1:])
         pvs = np.zeros(len(market_rates_rn) + 1)
         pvs = cashflows * discount_rates_rn
         return sum(pvs)
