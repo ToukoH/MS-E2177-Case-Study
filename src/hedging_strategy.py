@@ -42,6 +42,8 @@ class HedgingStrategy:
         self.market_rates_rn_list = []
         self.discount_factors_rn_list = []
 
+        self.npv_liabilities = 1_000_000_000
+
         self._split_data()
         self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
@@ -78,7 +80,7 @@ class HedgingStrategy:
         -------
         The resulting cashflow score.
         """
-        return np.linalg.norm(cashflow)
+        return np.linalg.norm(cashflow[1:])
 
     def match_cashflows(self, x):
         """
@@ -108,8 +110,12 @@ class HedgingStrategy:
         init_cashflow = np.sum([contract.size for contract in self.contracts])
         x_0 = np.zeros(len(self.products))
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
+        # asset_prices = [product.price for product in self.products] # prices of products could be calculated like this
+        asset_prices = np.ones(len(self.products)) # temporary 
+        constraint = ({'type': 'ineq', 'fun': lambda x: self.npv_liabilities - x.dot(asset_prices)}, # npv_liabilities >= assets at t=0
+                    {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         bnds = ((0, 1e10) for i in range(len(x_0)))
-        res = minimize(self.match_cashflows, x_0, tol=0.1)
+        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1)
         print(res)
         return res.x  # returns the size of the asset portfolio
 
