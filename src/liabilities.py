@@ -28,7 +28,7 @@ class Liabilities:
             accumulated_cashflows += contract.calculate_cashflows(market_rates)
         return accumulated_cashflows
 
-    def calculate_npv(self, market_rates_rn_list, discount_rates_rn_list): # LEEVI DO THIS!!!!!
+    def calculate_npv(self, market_rates_rn_list, discount_rates_rn_list): 
         """
         This function calculate the accumulated npvs of all contracts.
         Parameters
@@ -39,15 +39,6 @@ class Liabilities:
         -------
         total cashflow of all contracts
         """
-
-        """
-        accumulated_npvs = np.zeros(len(market_rates) + 1)
-
-        for contract in self.contracts:
-            accumulated_npvs += contract.calculate_npvs(market_rates, discount_rates)
-        return accumulated_npvs
-        """
-
         accumulated_npv = 0
 
         for contract in self.contracts:
