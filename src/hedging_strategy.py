@@ -95,7 +95,6 @@ class HedgingStrategy:
         for i in range(self.n_of_simulations):
             liabilities_cashflow = self.liabilities_cashflows_list[i] 
             assets_cashflow = x.dot(self.products_cashflows_list[i]) 
-            self.assets_cashflows_list.append(assets_cashflow)
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             accumulated_result += self.cashflows_target_function(resulting_cashflow)
         return accumulated_result
@@ -126,14 +125,10 @@ class HedgingStrategy:
         -------
         Average cashflows of liabilities and assets as a tuple.
         """
-        self.liabilities_cashflows_list = []
         self.assets_cashflows_list = []
-        for market_rates in self.market_rates_list[:self.n_of_simulations]:
-            kwargs = {'t_end': len(market_rates),
-                      'market_rates': market_rates}
-            self.liabilities_cashflows_list.append(self.liabilities.calculate_cashflows(market_rates))
-            self.assets_cashflows_list.append(x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products])))
-        self.liabilities_cashflows_list = np.array(self.liabilities_cashflows_list)
+        for product_cashflow in self.products_cashflows_list:
+            self.assets_cashflows_list.append(x.dot(product_cashflow))
+
         self.assets_cashflows_list = np.array(self.assets_cashflows_list)
         return np.average(self.liabilities_cashflows_list, axis=0), np.average(self.assets_cashflows_list, axis=0)
     
