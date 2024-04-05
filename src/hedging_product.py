@@ -3,7 +3,6 @@ from Products.variable_rate_coupon import VariableCouponBond
 from Products.swaption import Swaption
 import numpy as np
 
-
 class HedgingProduct:
     def __init__(self):
         self.products = []
@@ -26,8 +25,11 @@ class HedgingProduct:
             results.append(product.calculate_payoff())
         return results
     
-    def calculate_npvs(self): # TOUKO DO THIS!!!!
-        results = []
+    def calculate_npvs(self, discount_rate, t_end, market_rates=None):
+        npvs = []
         for product in self.products:
-            results.append(product.calculate_npv())
-        return results
+            cash_flows = product.calculate_payoff(t_end, market_rates)
+            times = np.arange(len(cash_flows))
+            npv = np.sum(cash_flows / ((1 + discount_rate) ** times))
+            npvs.append(npv)
+        return npvs

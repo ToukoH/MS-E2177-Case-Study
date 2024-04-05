@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class FixedCouponBond:
     def __init__(self, coupon, start_time=0, maturity=10, face_value=1, price=1):
         self.coupon = coupon
@@ -15,4 +14,3 @@ class FixedCouponBond:
         cashflows[self.start_time + 1: self.start_time + self.maturity] = self.face_value * self.coupon
         cashflows[self.start_time + self.maturity] = self.face_value + self.face_value * self.coupon
         return cashflows
-

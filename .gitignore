@@ -1,6 +1,6 @@
-data/
 venv/
 .ipynb_checkpoints/
 /src/__pycache__
 .DS_Store
 fennia.xlsx
+src/Products/__pycache__

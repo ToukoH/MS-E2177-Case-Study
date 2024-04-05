@@ -7,7 +7,7 @@ from scipy.optimize import minimize, LinearConstraint
 
 @dataclass
 class HedgingStrategy:
-    def __init__(self, data,
+    def __init__(self, data_real, data_rn,
                  hedging_product: HedgingProduct,
                  liabilities: Liabilities,
                  n_of_simulations=None):
@@ -15,12 +15,14 @@ class HedgingStrategy:
 
         Parameters
         ----------
-        data --- data describing all simulations
+        data --- real data describing all simulations 
+        data_rn --- risk neutral data describing all simulations 
         hedging_product --- an instance of the HedgingProduct class
         liabilities --- an instance of the Liabilities class
         n_of_simulations --- number of the simulations paths that we consider
         """
-        self.data = data
+        self.data_real = data_real
+        self.data_rn = data_rn
 
         self.hp = hedging_product
         self.products = self.hp.products
@@ -37,17 +39,36 @@ class HedgingStrategy:
 
         self.assets_cashflows_list = [] 
 
+        self.market_rates_rn_list = []
+        self.discount_factors_rn_list = []
+
+
         self._split_data()
         self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
-    def _split_data(self):
-        trials = self.data['Trial'].iloc[-1]
-        split_data = np.split(self.data, trials)
+        self.npv_liabilities = self.liabilities.calculate_npv(self.market_rates_rn_list, self.discount_factors_rn_list)
+        #self.npv_liabilities = -3_000_000
+        print(self.npv_liabilities)
 
-        for subset in split_data:  # Loop through the split data
-            #market_rates = subset['SpotRate1']  # Using forecasted spot rates as the market rates
+    def _split_data(self):
+        # Real data
+        trials = self.data_real['Trial'].iloc[-1]
+        split_data = np.split(self.data_real, trials)
+
+        # Risk neutral data
+        trials_rn = self.data_rn['Trial'].iloc[-1]
+        split_data_rn = np.split(self.data_rn, trials_rn)
+
+        for subset in split_data:  # Loop through the split data (real data)
             market_rates = subset['ESG.Economies.EUR_DEM.NominalYieldCurves.SWAP.SpotRate(Govt; 1; 3)'] 
             self.market_rates_list.append(market_rates)
+
+        for subset in split_data_rn: # Loop through the split data (risk neutral data)
+            market_rates_rn = subset['SpotRate1']
+            self.market_rates_rn_list.append(market_rates_rn)
+
+            discount_factors_rn = subset['Deflator']
+            self.discount_factors_rn_list.append(discount_factors_rn)
 
     @staticmethod
     def cashflows_target_function(cashflow):
@@ -62,7 +83,8 @@ class HedgingStrategy:
         -------
         The resulting cashflow score.
         """
-        return np.linalg.norm(cashflow)
+        #return np.linalg.norm(cashflow[1:])
+        return np.linalg.norm(np.minimum(cashflow[1:], np.zeros(len(cashflow[1:])))) # don't care about positive cashflows
 
     def match_cashflows(self, x):
         """
@@ -79,7 +101,6 @@ class HedgingStrategy:
         for i in range(self.n_of_simulations):
             liabilities_cashflow = self.liabilities_cashflows_list[i] 
             assets_cashflow = x.dot(self.products_cashflows_list[i]) 
-            self.assets_cashflows_list.append(assets_cashflow)
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             accumulated_result += self.cashflows_target_function(resulting_cashflow)
         return accumulated_result
@@ -93,8 +114,12 @@ class HedgingStrategy:
         init_cashflow = np.sum([contract.size for contract in self.contracts])
         x_0 = np.zeros(len(self.products))
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
+        # asset_prices = [product.price for product in self.products] # prices of products could be calculated like this
+        asset_prices = np.ones(len(self.products)) # temporary 
+        constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, # - npv_liabilities >= assets at t=0 (npv_liab is neg)
+                    {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         bnds = ((0, 1e10) for i in range(len(x_0)))
-        res = minimize(self.match_cashflows, x_0, tol=0.1)
+        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1)
         print(res)
         return res.x  # returns the size of the asset portfolio
 
@@ -110,14 +135,10 @@ class HedgingStrategy:
         -------
         Average cashflows of liabilities and assets as a tuple.
         """
-        self.liabilities_cashflows_list = []
         self.assets_cashflows_list = []
-        for market_rates in self.market_rates_list[:self.n_of_simulations]:
-            kwargs = {'t_end': len(market_rates),
-                      'market_rates': market_rates}
-            self.liabilities_cashflows_list.append(self.liabilities.calculate_cashflows(market_rates))
-            self.assets_cashflows_list.append(x.dot(np.array([product.calculate_payoff(**kwargs) for product in self.products])))
-        self.liabilities_cashflows_list = np.array(self.liabilities_cashflows_list)
+        for product_cashflow in self.products_cashflows_list:
+            self.assets_cashflows_list.append(x.dot(product_cashflow))
+
         self.assets_cashflows_list = np.array(self.assets_cashflows_list)
         return np.average(self.liabilities_cashflows_list, axis=0), np.average(self.assets_cashflows_list, axis=0)
     
