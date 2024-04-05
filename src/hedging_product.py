@@ -25,11 +25,9 @@ class HedgingProduct:
             results.append(product.calculate_payoff())
         return results
     
-    def calculate_npvs(self, discount_rate, t_end, market_rates=None):
+    def calculate_npvs(self, spot_rates, market_rates=None):
         npvs = []
         for product in self.products:
-            cash_flows = product.calculate_payoff(t_end, market_rates)
-            times = np.arange(len(cash_flows))
-            npv = np.sum(cash_flows / ((1 + discount_rate) ** times))
+            npv = product.calculate_npv(spot_rates)
             npvs.append(npv)
         return npvs
