@@ -47,6 +47,7 @@ class HedgingStrategy:
         self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
         self.npv_liabilities = self.liabilities.calculate_npv(self.market_rates_rn_list, self.discount_factors_rn_list)
+        #self.npv_liabilities = -3_000_000
         print(self.npv_liabilities)
 
     def _split_data(self):
@@ -82,7 +83,8 @@ class HedgingStrategy:
         -------
         The resulting cashflow score.
         """
-        return np.linalg.norm(cashflow[1:])
+        #return np.linalg.norm(cashflow[1:])
+        return np.linalg.norm(np.minimum(cashflow[1:], np.zeros(len(cashflow[1:])))) # don't care about positive cashflows
 
     def match_cashflows(self, x):
         """
