@@ -48,7 +48,7 @@ class HedgingStrategy:
 
         self.npv_liabilities = self.liabilities.calculate_npv(self.market_rates_rn_list, self.discount_factors_rn_list)
         #self.npv_liabilities = -3_000_000
-        print(self.npv_liabilities)
+        print('The liabilities npv is: ', self.npv_liabilities)
 
     def _split_data(self):
         # Real data
@@ -107,7 +107,7 @@ class HedgingStrategy:
 
     def optimize_cashflow_difference(self):
         if self.n_of_simulations is None:
-            self.n_of_simulations = len(self.market_rates_list)
+            self.n_of_simulations = len(self.market_rates_list) #tässä
         else:
             self.n_of_simulations = min(self.n_of_simulations, len(self.market_rates_list))
         print("Optimization started.")
@@ -116,7 +116,7 @@ class HedgingStrategy:
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
         # asset_prices = [product.price for product in self.products] # prices of products could be calculated like this
         asset_prices = np.ones(len(self.products)) # temporary 
-        constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, # - npv_liabilities >= assets at t=0 (npv_liab is neg)
+        constraint = ({'type': 'ineq', 'fun': lambda x:  -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         bnds = ((0, 1e10) for i in range(len(x_0)))
         res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1)

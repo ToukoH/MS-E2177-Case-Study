@@ -42,5 +42,10 @@ class Liabilities:
         accumulated_npv = 0
 
         for contract in self.contracts:
-            accumulated_npv += contract.calculate_npv(market_rates_rn_list, discount_rates_rn_list)
+            helper = contract.calculate_npv(market_rates_rn_list, discount_rates_rn_list)
+            # print('The contract npv is: ', helper)
+            accumulated_npv += helper
+
+
+
         return accumulated_npv
