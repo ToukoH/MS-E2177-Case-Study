@@ -57,13 +57,18 @@ class Contract:
         -------
         An array of NPVS for the whole simulated period. 
         """
+        #print('The size of the market rates list is:', len(market_rates_rn_list))
         trials = zip(market_rates_rn_list, discount_rates_rn_list)
         accumulated_npvs = 0
 
         for market_rates_rn, discount_rates_rn in trials:
             accumulated_npvs += self.calculate_npv_single_trial(market_rates_rn, discount_rates_rn)
 
-        return accumulated_npvs / len(market_rates_rn)
+        
+        #print(accumulated_npvs)
+        #print(len(market_rates_rn_list))
+        #print(accumulated_npvs / len(market_rates_rn_list))
+        return accumulated_npvs / len(market_rates_rn_list)
     
     def calculate_npv_single_trial(self, market_rates_rn, discount_rates_rn):
         """
@@ -81,4 +86,4 @@ class Contract:
         cashflows = self.calculate_cashflows(market_rates_rn[1:])
         pvs = np.zeros(len(market_rates_rn) + 1)
         pvs = cashflows * discount_rates_rn
-        return sum(pvs)
+        return sum(pvs[1:])
