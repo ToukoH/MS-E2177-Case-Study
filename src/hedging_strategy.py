@@ -46,11 +46,16 @@ class HedgingStrategy:
 
 
         self._split_data()
-        self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
+        
 
         self.npv_liabilities = self.liabilities.calculate_npv(self.market_rates_rn_list, self.discount_factors_rn_list)
         #self.npv_liabilities = -3_000_000
         print('The liabilities npv is: ',self.npv_liabilities)
+
+        self.product_prices = self.hp.calculate_npvs(self.yield_curve)
+        print(self.product_prices)
+
+        self._calculate_liab_product_cashflows() # calculate liability and product cashflows only once at the start
 
     def _split_data(self):
         # Real data
@@ -121,7 +126,7 @@ class HedgingStrategy:
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
         # asset_prices = [product.price for product in self.products] # prices of products could be also calculated like this
         # asset_prices = self.hp.calculate_npvs(self.yield_curve) # calculate npvs of products (assets)
-        asset_prices = np.ones(len(self.products)) # temporary 
+        asset_prices = self.product_prices
         constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         bnds = ((0, 1e10) for i in range(len(x_0)))
