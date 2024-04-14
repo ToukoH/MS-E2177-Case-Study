@@ -16,3 +16,7 @@ class VariableCouponBond:
         cashflows[self.start_time + self.maturity] += self.face_value 
         return cashflows
     
+    def calculate_npv(self, spot_rates):
+        self.price = self.face_value
+        return self.face_value
+    

@@ -12,7 +12,7 @@ data_path_rn = "data/data.csv"
 data_real = data_processing(data_path_real)
 data_rn = data_processing(data_path_rn)
 
-n_contracts = 100
+n_contracts = 1
 seed = np.random.default_rng(1) # or 97584730930274884604721697427988122108
 coupon = 0.0
 
@@ -24,7 +24,7 @@ sizes = seed.integers(1000, 50000, n_contracts)
 
 for i in range(1, 11):
     HP.add_fixed_coupon_bond(maturity=i, coupon = coupon)
-    HP.add_variable_coupon_bond(maturity=i)
+    #HP.add_variable_coupon_bond(maturity=i)
 
 for i in range(n_contracts):
     contract = Contract(size=sizes[i], maturity=maturities[i])
@@ -37,8 +37,12 @@ print(x)
 
 x = np.maximum(x, np.zeros(len(x)))
 
+time_vector = np.arange(0, 12)
+bar_width = 0.35
+
 lc, ac = HS.calculate_optimal_average_cashflows(x)
-plt.plot(lc, label='liabilities')
-plt.plot(-ac, label='assets')
+#print('The average assets cashflows are:', ac)
+plt.bar(time_vector - bar_width/4, lc, bar_width/2, label='liabilities')
+plt.bar(time_vector + bar_width/4, -ac, bar_width/2, label='assets')
 plt.legend()
 plt.show()

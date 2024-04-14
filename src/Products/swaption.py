@@ -24,3 +24,6 @@ class Swaption:
 
     def set_forward_rates(self, forward_rates):
         self.forward_rates = np.array(forward_rates)
+
+    def calculate_npv(self, spot_rates): # Not correct!
+        return 1
