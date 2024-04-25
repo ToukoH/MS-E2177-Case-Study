@@ -13,7 +13,7 @@ class Swaption:
         self.duration = duration
         self.premium = premium
         self.type = type
-        
+
         self.discount_rates = np.array([])
         self.forward_rates = np.array([])
 
@@ -33,8 +33,10 @@ class Swaption:
     def set_forward_rates(self, forward_rates):
         self.forward_rates = np.array(forward_rates)
 
-    def calculate_npv(self, spot_rates):
-        discount_factors = np.exp(-np.array(spot_rates) * np.arange(1, self.maturity + 1))
-        discounted_payoff = self.calculate_payoff() * discount_factors[-1]
-        npv = discounted_payoff - self.premium
-        return npv
+    def calculate_npvs(self):
+        annual_net_cash_flow = self.calculate_payoff()
+        npvs = []
+        for i in range(self.maturity):
+            npv = annual_net_cash_flow / (1 + self.discount_rates[i]) ** (i + 1)
+            npvs.append(npv)
+        return npvs
