@@ -1,7 +1,7 @@
 from Products.fixed_rate_coupon import FixedCouponBond
 from Products.variable_rate_coupon import VariableCouponBond
 from Products.swaption import Swaption
-import numpy as np
+from Products.swap import Swap
 
 class HedgingProduct:
     def __init__(self):
@@ -15,9 +15,13 @@ class HedgingProduct:
         bond = VariableCouponBond(**kwargs)
         self.products.append(bond)
 
-    def add_swaption(self):
-        swaption = Swaption()
+    def add_swaption(self, **kwargs):
+        swaption = Swaption(**kwargs)
         self.products.append(swaption)
+
+    def add_swap(self, **kwargs):
+        swap = Swap(**kwargs)
+        self.products.append(swap)
 
     def calculate_cash_flows(self):
         results = []
