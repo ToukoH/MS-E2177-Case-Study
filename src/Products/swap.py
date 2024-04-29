@@ -1,7 +1,9 @@
 import numpy as np
+from Products import fixed_rate_coupon, variable_rate_coupon
 
 class Swap:
     def __init__(self, maturity, face_value, received_rate, price = 1, start_time = 0):
+        self.name = "Swap"
         self.maturity = maturity
         self.face_value = face_value
         self.received_rate = received_rate
@@ -34,9 +36,22 @@ class Swap:
         return cashflows
     
     def calculate_npv(self, spot_rates):
+        
+        fixed_leg = fixed_rate_coupon.FixedCouponBond(coupon=self.received_rate, maturity=self.maturity)
+        fixed_leg.calculate_npv(spot_rates)
+        floating_leg = variable_rate_coupon.VariableCouponBond(maturity=self.maturity)
+        floating_leg.calculate_npv(spot_rates)
+
+        npv = fixed_leg.price - floating_leg.price
+        return npv
+    
+    """
+    def calculate_npv(self, spot_rates):
         cash_flows = self.calculate_payoff(self.maturity, spot_rates)
         times = np.arange(len(cash_flows))
         pvs = cash_flows / ((1 + spot_rates[self.maturity]) ** times)
         npv = np.sum(pvs[1:]) # t=0 not included
         self.price = npv # update price
         return npv
+        
+    """

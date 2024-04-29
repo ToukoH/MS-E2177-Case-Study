@@ -41,6 +41,8 @@ class Contract:
         cashflows[self.start_time] = self.size
         cashflows[self.start_time + self.maturity] = - self.size * total_multiplier
 
+        #print(cashflows)
+
         return cashflows
 
     def calculate_npv(self, market_rates_rn_list, discount_rates_rn_list):

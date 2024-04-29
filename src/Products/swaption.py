@@ -7,6 +7,7 @@ import numpy as np
 
 class Swaption:
     def __init__(self, notional, strike_rate, maturity, duration, premium, type):
+        self.name = "Swaption"
         self.notional = notional
         self.strike_rate = strike_rate
         self.maturity = maturity

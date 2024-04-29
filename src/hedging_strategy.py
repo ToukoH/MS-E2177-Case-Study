@@ -44,10 +44,11 @@ class HedgingStrategy:
 
         self.yield_curve = []
 
-
         self._split_data()
-        
 
+        self.market_rates_list = self.market_rates_list[0:self.n_of_simulations] # Vlad: Trunctate data based on simulation length
+        self.market_rates_rn_list = self.market_rates_rn_list[0:self.n_of_simulations] # Vlad: Trunctate data based on simulation length
+        
         self.npv_liabilities = self.liabilities.calculate_npv(self.market_rates_rn_list, self.discount_factors_rn_list)
         #self.npv_liabilities = -3_000_000
         print('The liabilities npv is: ',self.npv_liabilities)
@@ -78,7 +79,7 @@ class HedgingStrategy:
             self.discount_factors_rn_list.append(discount_factors_rn)
 
         # Extract the yield curve
-        self.yield_curve = (self.data_real.iloc[1]).to_numpy()[1:]
+        self.yield_curve = (self.data_real.iloc[0]).to_numpy()[1:]
 
     @staticmethod
     def cashflows_target_function(cashflow):
@@ -93,8 +94,10 @@ class HedgingStrategy:
         -------
         The resulting cashflow score.
         """
-        #return np.linalg.norm(cashflow[1:])
-        return np.linalg.norm(np.minimum(cashflow[1:], np.zeros(len(cashflow[1:])))) # don't care about positive cashflows
+
+        #return np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
+        #return np.linalg.norm(np.minimum(cashflow[1:], np.zeros(len(cashflow[1:])))) # don't care about positive cashflows
+        return np.sum(cashflow)
 
     def match_cashflows(self, x):
         """
@@ -107,21 +110,23 @@ class HedgingStrategy:
         average cashflow score.
 
         """
-        accumulated_result = 0
+        accumulated_result = []
         for i in range(self.n_of_simulations):
-            liabilities_cashflow = self.liabilities_cashflows_list[i] 
+            liabilities_cashflow = self.liabilities_cashflows_list[i]
             assets_cashflow = x.dot(self.products_cashflows_list[i]) 
             resulting_cashflow = assets_cashflow + liabilities_cashflow
-            accumulated_result += self.cashflows_target_function(resulting_cashflow)
-        return accumulated_result
+            accumulated_result.append(self.cashflows_target_function(resulting_cashflow))
+        #return np.sum(accumulated_result)
+        return -np.percentile(accumulated_result, 5)
 
     def optimize_cashflow_difference(self):
         if self.n_of_simulations is None:
-            self.n_of_simulations = len(self.market_rates_list) #tässä
+            self.n_of_simulations = len(self.market_rates_list)
         else:
             self.n_of_simulations = min(self.n_of_simulations, len(self.market_rates_list))
+
         print("Optimization started.")
-        init_cashflow = np.sum([contract.size for contract in self.contracts])
+        #init_cashflow = np.sum([contract.size for contract in self.contracts])
         x_0 = np.zeros(len(self.products))
         # constraint = LinearConstraint(A=np.identity(len(x_0)), lb=zero_time_npv, ub=zero_time_npv)
         # asset_prices = [product.price for product in self.products] # prices of products could be also calculated like this
@@ -129,8 +134,9 @@ class HedgingStrategy:
         asset_prices = self.product_prices
         constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
-        bnds = ((0, 1e10) for i in range(len(x_0)))
-        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1)
+        #bnds = ((0, 1e10) for i in range(len(x_0)))
+        opt = {'maxiter':500}
+        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1, options=opt)
         print(res)
         return res.x  # returns the size of the asset portfolio
 
