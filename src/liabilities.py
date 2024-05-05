@@ -8,9 +8,11 @@ class Liabilities:
     """
     def __init__(self):
         self.contracts = []
+        self.size_of_contracts = 0
 
     def add_contract(self, contract: Contract):
         self.contracts.append(contract)
+        self.size_of_contracts += contract.size
 
     def calculate_cashflows(self, market_rates):
         """

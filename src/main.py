@@ -29,7 +29,7 @@ for i in range(1, 11):
 
 
 for i in range(n_contracts):
-    contract = Contract(size=sizes[i], maturity=maturities[i])
+    contract = Contract(size=sizes[i], maturity=maturities[i], guaranteed_rate=0.035)
     L.add_contract(contract)
 
 """
@@ -37,7 +37,7 @@ contract = Contract(size=10_000, maturity=10)
 L.add_contract(contract)
 """
 
-HS = HedgingStrategy(data_real, data_rn, HP, L)
+HS = HedgingStrategy(data_real, data_rn, HP, L, 100)
 x = HS.optimize_cashflow_difference()
 
 print(x)
