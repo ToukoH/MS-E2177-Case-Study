@@ -43,6 +43,7 @@ class Swap:
         floating_leg.calculate_npv(spot_rates)
 
         npv = fixed_leg.price - floating_leg.price
+        self.price = npv # update price
         return npv
     
     """
