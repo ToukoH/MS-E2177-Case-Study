@@ -96,8 +96,8 @@ class HedgingStrategy:
         """
 
         #cashflow = cashflow[1:] # Do we want to add the initial cash flow to the hedging logic
-        #return -np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
-        return np.sum(cashflow)
+        return np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
+        #return np.sum(cashflow)
 
     def match_cashflows(self, x):
         """
@@ -118,8 +118,8 @@ class HedgingStrategy:
             #resulting_cashflow = np.divide(resulting_cashflow, np.power((1+self.yield_curve[0:12]), np.arange(0, 12))) # Discount
             accumulated_result.append(self.cashflows_target_function(resulting_cashflow))
         #return -np.percentile(accumulated_result, 5)
-        return -np.min(accumulated_result)
-        #return -np.sum(accumulated_result)
+        #return -np.min(accumulated_result)
+        return np.sum(accumulated_result)
 
     def optimize_cashflow_difference(self):
         if self.n_of_simulations is None:
