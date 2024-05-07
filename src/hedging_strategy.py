@@ -95,9 +95,10 @@ class HedgingStrategy:
         The resulting cashflow score.
         """
 
-        #cashflow = cashflow[1:] # Do we want to add the initial cash flow to the hedging logic
-        #return -np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
-        return np.sum(cashflow)
+        cashflow = cashflow[1:] # Do we want to add the initial cash flow to the hedging logic
+        return -np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
+        #return sum([c * (-c) if c < 0 else c for c in cashflow])
+        #return np.sum(cashflow)
 
     def match_cashflows(self, x):
         """
@@ -118,8 +119,8 @@ class HedgingStrategy:
             #resulting_cashflow = np.divide(resulting_cashflow, np.power((1+self.yield_curve[0:12]), np.arange(0, 12))) # Discount
             accumulated_result.append(self.cashflows_target_function(resulting_cashflow))
         #return -np.percentile(accumulated_result, 5)
-        return -np.min(accumulated_result)
-        #return -np.sum(accumulated_result)
+        #return -np.min(accumulated_result)
+        return -np.sum(accumulated_result)
 
     def optimize_cashflow_difference(self):
         if self.n_of_simulations is None:
@@ -135,11 +136,11 @@ class HedgingStrategy:
         # asset_prices = self.hp.calculate_npvs(self.yield_curve) # calculate npvs of products (assets)
         asset_prices = self.product_prices
         #constraint = ({'type': 'ineq', 'fun': lambda x: self.liabilities.size_of_contracts - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
-        constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
+        constraint = ({'type': 'eq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         #bnds = ((0, 1e10) for i in range(len(x_0)))
-        opt = {'maxiter':1000}
-        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.001, options=opt, method='SLSQP')
+        opt = {'maxiter':2000}
+        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.001, options=opt)
         print(res)
         return res.x  # returns the size of the asset portfolio
 

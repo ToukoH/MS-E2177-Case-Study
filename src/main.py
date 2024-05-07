@@ -54,7 +54,11 @@ bar_width = 0.35
 
 lc, ac = HS.calculate_optimal_average_cashflows(x)
 
-simulation_cashflows = np.sum((HS.assets_cashflows_list + HS.liabilities_cashflows_list), axis=1)
+acl_removed = np.array([inner_list[1:] for inner_list in HS.assets_cashflows_list])
+lcl_removed = np.array([inner_list[1:] for inner_list in HS.liabilities_cashflows_list])
+
+simulation_cashflows = np.sum((acl_removed + lcl_removed), axis=1)
+#simulation_cashflows = np.sum((HS.assets_cashflows_list + HS.liabilities_cashflows_list), axis=1)
 print(f"Mean of total cashflows: {np.mean(simulation_cashflows)}")
 print(f"Standard deviation of cashflows: {np.std(simulation_cashflows)}")
 print(f"5-percentile of cashflows: {np.percentile(simulation_cashflows, 5)}")
