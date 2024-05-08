@@ -7,8 +7,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import data_processing
 
+### variables
+shock = 150 # -150, -100, -50, 50, 100, 150
+opt_type = 1 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
+guar_rate = 0.035 # 0.02, 0.035, 0.06
+###
+
 data_path_real = "data/Example Output EUR Swap Spot 2023Q4 updated.csv"
 data_path_rn = "data/data.csv"
+
+if shock == -150:
+    data_path_rn = "data/20231231_Hf_output_minus150.csv"
+elif shock == -100:
+    data_path_rn = "data/20231231_Hf_output_minus100.csv"
+elif shock == -50:
+    data_path_rn = "data/20231231_Hf_output_minus50.csv"
+elif shock == 50:
+    data_path_rn = "data/20231231_Hf_output_plus50.csv"
+elif shock == 100:
+    data_path_rn = "data/20231231_Hf_output_plus100.csv"
+elif shock == 150:
+    data_path_rn = "data/20231231_Hf_output_plus150.csv"
+
 data_real = data_processing(data_path_real)
 data_rn = data_processing(data_path_rn)
 
@@ -24,12 +44,12 @@ sizes = seed.integers(1000, 50000, n_contracts)
 
 for i in range(1, 11):
     HP.add_fixed_coupon_bond(maturity=i, coupon = coupon)
-    HP.add_swap(maturity = i, face_value = 1, received_rate = 0.035)
+    HP.add_swap(maturity = i, face_value = 1, received_rate = guar_rate)
     HP.add_variable_coupon_bond(maturity=i)
 
 
 for i in range(n_contracts):
-    contract = Contract(size=sizes[i], maturity=maturities[i], guaranteed_rate=0.035)
+    contract = Contract(size=sizes[i], maturity=maturities[i], guaranteed_rate=guar_rate)
     L.add_contract(contract)
 
 """
@@ -37,7 +57,7 @@ contract = Contract(size=10_000, maturity=10)
 L.add_contract(contract)
 """
 
-HS = HedgingStrategy(data_real, data_rn, HP, L, 100)
+HS = HedgingStrategy(data_real, data_rn, HP, L, opt_type, 100)
 x = HS.optimize_cashflow_difference()
 
 print(x)

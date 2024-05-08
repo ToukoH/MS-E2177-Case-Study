@@ -10,6 +10,7 @@ class HedgingStrategy:
     def __init__(self, data_real, data_rn,
                  hedging_product: HedgingProduct,
                  liabilities: Liabilities,
+                 optimization_type,
                  n_of_simulations=None):
         """
 
@@ -23,6 +24,7 @@ class HedgingStrategy:
         """
         self.data_real = data_real
         self.data_rn = data_rn
+        self.optimization_type = optimization_type
 
         self.hp = hedging_product
         self.products = self.hp.products
@@ -81,8 +83,8 @@ class HedgingStrategy:
         # Extract the yield curve
         self.yield_curve = (self.data_real.iloc[0]).to_numpy()[1:]
 
-    @staticmethod
-    def cashflows_target_function(cashflow):
+    #@staticmethod
+    def cashflows_target_function(self, cashflow):
         """
         This is a function that we want to optimize. Basically, if we have a resulting cashflow,
         this is the measure of it being good or bad.
@@ -96,9 +98,11 @@ class HedgingStrategy:
         """
 
         cashflow = cashflow[1:] # Do we want to add the initial cash flow to the hedging logic
-        return -np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
         #return sum([c * (-c) if c < 0 else c for c in cashflow])
-        #return np.sum(cashflow)
+        if self.optimization_type == 1:
+            return -np.linalg.norm(np.minimum(cashflow, np.zeros(len(cashflow)))) # don't care about positive cashflows
+        else:
+            return np.sum(cashflow)
 
     def match_cashflows(self, x):
         """
@@ -118,9 +122,14 @@ class HedgingStrategy:
             resulting_cashflow = assets_cashflow + liabilities_cashflow
             #resulting_cashflow = np.divide(resulting_cashflow, np.power((1+self.yield_curve[0:12]), np.arange(0, 12))) # Discount
             accumulated_result.append(self.cashflows_target_function(resulting_cashflow))
-        #return -np.percentile(accumulated_result, 5)
-        #return -np.min(accumulated_result)
-        return -np.sum(accumulated_result)
+
+        if self.optimization_type == 1:
+            return -np.sum(accumulated_result)
+        elif self.optimization_type == 2:
+            return -np.percentile(accumulated_result, 5)
+        else:
+            return -np.min(accumulated_result)
+        
 
     def optimize_cashflow_difference(self):
         if self.n_of_simulations is None:
@@ -136,7 +145,7 @@ class HedgingStrategy:
         # asset_prices = self.hp.calculate_npvs(self.yield_curve) # calculate npvs of products (assets)
         asset_prices = self.product_prices
         #constraint = ({'type': 'ineq', 'fun': lambda x: self.liabilities.size_of_contracts - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
-        constraint = ({'type': 'eq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
+        constraint = ({'type': 'ineq', 'fun': lambda x: -self.npv_liabilities - x.dot(asset_prices)}, #-self.npv_liabilities init_cashflow , - npv_liabilities >= assets at t=0 (npv_liab is neg)
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         #bnds = ((0, 1e10) for i in range(len(x_0)))
         opt = {'maxiter':2000}
