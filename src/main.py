@@ -8,15 +8,15 @@ import matplotlib.pyplot as plt
 from utils import data_processing
 
 ### variables
-shock = 50 # -150, -100, -50, 50, 100, 150
-opt_type = 1 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
+shock = 0 # -150, -100, -50, 0, 50, 100, 150
+opt_type = 3 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
 
 ### parameters 
 n_contracts = 50
 years = 30
-trials = 10
+trials = 100
 ###
 
 data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
@@ -97,7 +97,7 @@ fig1.show()
 
 # Plot 2
 fig2 = plt.figure(2)
-plt.bar(time_vector - bar_width/4, np.cumsum(lc[1:years+1] + ac[1:years+1]), bar_width/2, label='liabilities')
+plt.bar(time_vector, np.cumsum(lc[1:years+1] + ac[1:years+1]), bar_width, label='liabilities')
 plt.legend()
 fig2.show()
 
@@ -106,6 +106,15 @@ fig2.show()
 ax1 = products_df.groupby(['Maturity', 'Product'])['Position size'].sum().unstack().plot.bar(stacked=True)
 fig3 = ax1.get_figure()
 fig3.show()
+
+# Plot 4
+fig4 = plt.figure(4)
+for i in range(0, trials):
+    plt.plot(time_vector, (acl_removed[i] + lcl_removed[i])[0:years], color="blue")
+plt.plot(time_vector, np.zeros(len(time_vector)), color="red")
+fig4.show()
+
+
 
 """
 # Plot 4
