@@ -15,11 +15,13 @@ guar_rate = 0.035 # 0.02, 0.035, 0.06
 
 ### parameters 
 n_contracts = 50
-years = 10
-trials = 100
+years = 30
+trials = 10
 ###
 
-data_path_real = "data/Example Output EUR Swap Spot 2023Q4 updated.csv"
+data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
+data_real = data_real.replace(",", ".", regex=True)
+data_real = data_real.apply(pd.to_numeric)
 data_path_rn = "data/data.csv"
 
 if shock == -150:
@@ -35,7 +37,6 @@ elif shock == 100:
 elif shock == 150:
     data_path_rn = "data/20231231_Hf_output_plus150.csv"
 
-data_real = data_processing(data_path_real)
 data_rn = data_processing(data_path_rn)
 
 seed = np.random.default_rng(97584730930274884604721697427988122108) # or 97584730930274884604721697427988122108
@@ -47,7 +48,7 @@ L = Liabilities()
 maturities = seed.integers(1, years+1, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
 
-for i in range(1, 11):
+for i in range(1, years+1):
     HP.add_fixed_coupon_bond(maturity=i, coupon = coupon)
     HP.add_swap(maturity = i, face_value = 1, received_rate = guar_rate)
     HP.add_variable_coupon_bond(maturity=i)
@@ -83,7 +84,6 @@ acl_removed = np.array([inner_list[1:] for inner_list in HS.assets_cashflows_lis
 lcl_removed = np.array([inner_list[1:] for inner_list in HS.liabilities_cashflows_list])
 
 simulation_cashflows = np.sum((acl_removed + lcl_removed), axis=1)
-#simulation_cashflows = np.sum((HS.assets_cashflows_list + HS.liabilities_cashflows_list), axis=1)
 print(f"Mean of total cashflows: {np.mean(simulation_cashflows)}")
 print(f"Standard deviation of cashflows: {np.std(simulation_cashflows)}")
 print(f"5-percentile of cashflows: {np.percentile(simulation_cashflows, 5)}")
@@ -94,13 +94,13 @@ plt.hist(simulation_cashflows, bins=50)
 plt.axvline(x = 0, color = 'b', label = 'axvline - full height')
 fig1.show()
 
+
 # Plot 2
 fig2 = plt.figure(2)
-plt.bar(time_vector - bar_width/4, np.cumsum(lc[1:-1] + ac[1:-1]), bar_width/2, label='liabilities')
-#plt.bar(time_vector - bar_width/4, lc[1:-1] + ac[1:-1], bar_width/2)
-#plt.bar(time_vector + bar_width/4, -ac, bar_width/2, label='assets')
+plt.bar(time_vector - bar_width/4, np.cumsum(lc[1:years+1] + ac[1:years+1]), bar_width/2, label='liabilities')
 plt.legend()
 fig2.show()
+
 
 # Plot 3
 ax1 = products_df.groupby(['Maturity', 'Product'])['Position size'].sum().unstack().plot.bar(stacked=True)
