@@ -13,6 +13,12 @@ opt_type = 1 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
 
+### parameters 
+n_contracts = 50
+years = 10
+trials = 100
+###
+
 data_path_real = "data/Example Output EUR Swap Spot 2023Q4 updated.csv"
 data_path_rn = "data/data.csv"
 
@@ -32,14 +38,12 @@ elif shock == 150:
 data_real = data_processing(data_path_real)
 data_rn = data_processing(data_path_rn)
 
-n_contracts = 50
 seed = np.random.default_rng(97584730930274884604721697427988122108) # or 97584730930274884604721697427988122108
 coupon = 0.0
 
 HP = HedgingProduct()
 L = Liabilities()
 
-years = 10
 maturities = seed.integers(1, years+1, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
 
@@ -58,7 +62,7 @@ contract = Contract(size=10_000, maturity=10)
 L.add_contract(contract)
 """
 
-HS = HedgingStrategy(data_real, data_rn, HP, L, opt_type, 100)
+HS = HedgingStrategy(data_real, data_rn, HP, L, opt_type, trials)
 x = HS.optimize_cashflow_difference()
 
 print(x)
