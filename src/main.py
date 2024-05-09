@@ -100,7 +100,11 @@ results_df['Mean of total cashflows'] = np.mean(simulation_cashflows)
 results_df['Standard deviation of cashflows'] = np.std(simulation_cashflows)
 results_df['5-percentile of cashflows'] = np.percentile(simulation_cashflows, 5)
 
-results_df.to_excel(f'{PATH}/results.xlsx', sheet_name=f'{shock}-{opt_type}-{guar_rate}')
+with pd.ExcelWriter(f'{PATH}/results.xlsx') as writer:
+    pd.DataFrame(data=((acl_removed + lcl_removed)[0:years])).to_excel(writer, sheet_name='Cash Flows per Simulation')
+    pd.DataFrame(data=np.array(HS.market_rates_list)).to_excel(writer, sheet_name='Interest Rate Paths')
+    products_df.to_excel(writer, sheet_name='Product Allocation')
+    results_df.to_excel(writer, sheet_name='Results')
 
 # Plot 1
 fig1 = plt.figure(1)
