@@ -123,12 +123,10 @@ class HedgingStrategy:
             #resulting_cashflow = np.divide(resulting_cashflow, np.power((1+self.yield_curve[0:12]), np.arange(0, 12))) # Discount
             accumulated_result.append(self.cashflows_target_function(resulting_cashflow))
 
-        if self.optimization_type == 1:
-            return -np.sum(accumulated_result)
-        elif self.optimization_type == 2:
+        if self.optimization_type == 2:
             return -np.percentile(accumulated_result, 5)
         else:
-            return -np.min(accumulated_result)
+            return -np.sum(accumulated_result)
         
 
     def optimize_cashflow_difference(self):

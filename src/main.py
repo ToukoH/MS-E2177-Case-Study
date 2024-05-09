@@ -9,14 +9,14 @@ from utils import data_processing
 
 ### variables
 shock = 0 # -150, -100, -50, 0, 50, 100, 150
-opt_type = 3 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
+opt_type = 1 # 1: min dot product, 2: maximize 5th percentile gain, 3: min mean losses
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
 
 ### parameters 
 n_contracts = 50
 years = 30
-trials = 100
+trials = 10
 ###
 
 data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
