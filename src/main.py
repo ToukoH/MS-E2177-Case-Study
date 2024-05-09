@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from hedging_strategy import HedgingStrategy
 from hedging_product import HedgingProduct
 from liabilities import Liabilities
@@ -13,10 +14,10 @@ opt_type = 1 # 1: min dot product, 2: maximize 5th percentile gain, 3: max mean 
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
 
-### parameters 
+### parameters DONT TOUCH
 n_contracts = 50
 years = 15
-trials = 100
+trials = 10
 ###
 
 data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
@@ -88,10 +89,24 @@ print(f"Mean of total cashflows: {np.mean(simulation_cashflows)}")
 print(f"Standard deviation of cashflows: {np.std(simulation_cashflows)}")
 print(f"5-percentile of cashflows: {np.percentile(simulation_cashflows, 5)}")
 
+PATH = f'res/{shock}-{opt_type}-{guar_rate}'
+
+if not os.path.exists(PATH):
+    os.makedirs(PATH)
+
+results_df = pd.Series(name='Results', dtype='float64')
+
+results_df['Mean of total cashflows'] = np.mean(simulation_cashflows)
+results_df['Standard deviation of cashflows'] = np.std(simulation_cashflows)
+results_df['5-percentile of cashflows'] = np.percentile(simulation_cashflows, 5)
+
+results_df.to_excel(f'{PATH}/results.xlsx', sheet_name=f'{shock}-{opt_type}-{guar_rate}')
+
 # Plot 1
 fig1 = plt.figure(1)
 plt.hist(simulation_cashflows, bins=50)
 plt.axvline(x = 0, color = 'b', label = 'axvline - full height')
+fig1.savefig(f'{PATH}/{shock}-{opt_type}-{guar_rate}-1.png')
 fig1.show()
 
 # Plot 2
@@ -100,11 +115,13 @@ plt.plot(time_vector, np.cumsum(lc[1:years+1] + ac[1:years+1]), color='red', lab
 plt.bar(time_vector - bar_width/4, -lc[1:years+1], bar_width/2, label='liabilities')
 plt.bar(time_vector + bar_width/4, ac[1:years+1], bar_width/2, label='assets')
 plt.legend()
+fig2.savefig(f'{PATH}/{shock}-{opt_type}-{guar_rate}-2.png')
 fig2.show()
 
 # Plot 3
 ax1 = products_df.groupby(['Maturity', 'Product'])['Position size'].sum().unstack().plot.bar(stacked=True)
 fig3 = ax1.get_figure()
+fig3.savefig(f'{PATH}/{shock}-{opt_type}-{guar_rate}-3.png')
 fig3.show()
 
 # Plot 4
@@ -112,8 +129,8 @@ fig4 = plt.figure(4)
 for i in range(0, trials):
     plt.plot(time_vector, (acl_removed[i] + lcl_removed[i])[0:years], color="blue", alpha=0.2)
 plt.plot(time_vector, np.zeros(len(time_vector)), color="red")
+fig4.savefig(f'{PATH}/{shock}-{opt_type}-{guar_rate}-4.png')
 fig4.show()
-
 
 """
 # Plot 4
