@@ -9,14 +9,14 @@ from utils import data_processing
 
 ### variables
 shock = 0 # -150, -100, -50, 0, 50, 100, 150
-opt_type = 1 # 1: min dot product, 2: maximize 5th percentile gain, 3: min mean losses
+opt_type = 1 # 1: min dot product, 2: maximize 5th percentile gain, 3: max mean losses
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
 
 ### parameters 
 n_contracts = 50
-years = 30
-trials = 10
+years = 15
+trials = 100
 ###
 
 data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
@@ -94,13 +94,13 @@ plt.hist(simulation_cashflows, bins=50)
 plt.axvline(x = 0, color = 'b', label = 'axvline - full height')
 fig1.show()
 
-
 # Plot 2
 fig2 = plt.figure(2)
-plt.bar(time_vector, np.cumsum(lc[1:years+1] + ac[1:years+1]), bar_width, label='liabilities')
+plt.plot(time_vector, np.cumsum(lc[1:years+1] + ac[1:years+1]), color='red', label='total cash flows')
+plt.bar(time_vector - bar_width/4, -lc[1:years+1], bar_width/2, label='liabilities')
+plt.bar(time_vector + bar_width/4, ac[1:years+1], bar_width/2, label='assets')
 plt.legend()
 fig2.show()
-
 
 # Plot 3
 ax1 = products_df.groupby(['Maturity', 'Product'])['Position size'].sum().unstack().plot.bar(stacked=True)
@@ -110,10 +110,9 @@ fig3.show()
 # Plot 4
 fig4 = plt.figure(4)
 for i in range(0, trials):
-    plt.plot(time_vector, (acl_removed[i] + lcl_removed[i])[0:years], color="blue")
+    plt.plot(time_vector, (acl_removed[i] + lcl_removed[i])[0:years], color="blue", alpha=0.2)
 plt.plot(time_vector, np.zeros(len(time_vector)), color="red")
 fig4.show()
-
 
 
 """

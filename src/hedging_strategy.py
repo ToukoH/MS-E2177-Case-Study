@@ -147,7 +147,7 @@ class HedgingStrategy:
                     {'type': 'ineq', 'fun': lambda x: x}) # x >= 0
         #bnds = ((0, 1e10) for i in range(len(x_0)))
         opt = {'maxiter':2000}
-        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.001, options=opt)
+        res = minimize(self.match_cashflows, x_0, constraints=constraint, tol=0.1, options=opt)
         print(res)
         return res.x  # returns the size of the asset portfolio
 
