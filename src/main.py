@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from utils import data_processing
 
 ### variables
-shock = 150 # -150, -100, -50, 50, 100, 150
+shock = 50 # -150, -100, -50, 50, 100, 150
 opt_type = 1 # 1: min dot product, 2: min 5th percentile, 3: min biggest loss
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
@@ -39,7 +39,8 @@ coupon = 0.0
 HP = HedgingProduct()
 L = Liabilities()
 
-maturities = seed.integers(1, 11, n_contracts)
+years = 10
+maturities = seed.integers(1, years+1, n_contracts)
 sizes = seed.integers(1000, 50000, n_contracts)
 
 for i in range(1, 11):
@@ -69,7 +70,7 @@ products_df = pd.DataFrame(columns=['Product', 'Maturity', 'Price', 'Position si
 for idx, i in enumerate(HP.products):
     products_df.loc[idx] = [i.name, i.maturity, i.price, x[idx]]
 
-time_vector = np.arange(0, 12)
+time_vector = np.arange(1, years+1)
 bar_width = 0.35
 
 lc, ac = HS.calculate_optimal_average_cashflows(x)
@@ -91,8 +92,9 @@ fig1.show()
 
 # Plot 2
 fig2 = plt.figure(2)
-plt.bar(time_vector - bar_width/4, lc, bar_width/2, label='liabilities')
-plt.bar(time_vector + bar_width/4, -ac, bar_width/2, label='assets')
+plt.bar(time_vector - bar_width/4, np.cumsum(lc[1:-1] + ac[1:-1]), bar_width/2, label='liabilities')
+#plt.bar(time_vector - bar_width/4, lc[1:-1] + ac[1:-1], bar_width/2)
+#plt.bar(time_vector + bar_width/4, -ac, bar_width/2, label='assets')
 plt.legend()
 fig2.show()
 
