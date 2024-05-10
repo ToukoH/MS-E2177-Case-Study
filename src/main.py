@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from utils import data_processing
 
 ### variables
-shock = -150 # -150, -100, -50, 0, 50, 100, 150
+shock = -50 # -150, -100, -50, 0, 50, 100, 150
 opt_type = 3 # 1: min dot product, 2: maximize 5th percentile gain, 3: max mean gain
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
