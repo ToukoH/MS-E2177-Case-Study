@@ -7,9 +7,11 @@ from contract import Contract
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import data_processing
+import openpyxl
+
 
 ### variables
-shock = -150 # -150, -100, -50, 0, 50, 100, 150
+shock = 150  # -150, -100, -50, 0, 50, 100, 150
 opt_type = 3 # 1: min dot product, 2: maximize 5th percentile gain, 3: max mean gain
 guar_rate = 0.035 # 0.02, 0.035, 0.06
 ###
@@ -20,23 +22,26 @@ years = 15
 trials = 5000
 ###
 
-data_real = pd.read_csv("data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
+data_real = pd.read_csv("../data/Example Output EUR Swap Spot Truncated.csv", delimiter=",", index_col=False)
 data_real = data_real.replace(",", ".", regex=True)
 data_real = data_real.apply(pd.to_numeric)
-data_path_rn = "data/data.csv"
+data_path_rn = "../data/data.csv"
+
+PATH = f'res/{shock}-{opt_type}-{guar_rate}'
+
 
 if shock == -150:
-    data_path_rn = "data/20231231_Hf_output_minus150.csv"
+    data_path_rn = "../data/20231231_Hf_output_minus150.csv"
 elif shock == -100:
-    data_path_rn = "data/20231231_Hf_output_minus100.csv"
+    data_path_rn = "../data/20231231_Hf_output_minus100.csv"
 elif shock == -50:
-    data_path_rn = "data/20231231_Hf_output_minus50.csv"
+    data_path_rn = "../data/20231231_Hf_output_minus50.csv"
 elif shock == 50:
-    data_path_rn = "data/20231231_Hf_output_plus50.csv"
+    data_path_rn = "../data/20231231_Hf_output_plus50.csv"
 elif shock == 100:
-    data_path_rn = "data/20231231_Hf_output_plus100.csv"
+    data_path_rn = "../data/20231231_Hf_output_plus100.csv"
 elif shock == 150:
-    data_path_rn = "data/20231231_Hf_output_plus150.csv"
+    data_path_rn = "../data/20231231_Hf_output_plus150.csv"
 
 data_rn = data_processing(data_path_rn)
 
@@ -100,11 +105,6 @@ results_df['Mean of total cashflows'] = np.mean(simulation_cashflows)
 results_df['Standard deviation of cashflows'] = np.std(simulation_cashflows)
 results_df['5-percentile of cashflows'] = np.percentile(simulation_cashflows, 5)
 
-with pd.ExcelWriter(f'{PATH}/results.xlsx') as writer:
-    pd.DataFrame(data=((acl_removed + lcl_removed)[0:years])).to_excel(writer, sheet_name='Cash Flows per Simulation')
-    pd.DataFrame(data=np.array(HS.market_rates_list)).to_excel(writer, sheet_name='Interest Rate Paths')
-    products_df.to_excel(writer, sheet_name='Product Allocation')
-    results_df.to_excel(writer, sheet_name='Results')
 
 # Plot 1
 fig1 = plt.figure(1)
@@ -136,10 +136,17 @@ plt.plot(time_vector, np.zeros(len(time_vector)), color="red")
 fig4.savefig(f'{PATH}/{shock}-{opt_type}-{guar_rate}-4.png')
 fig4.show()
 
+with pd.ExcelWriter(f'{PATH}/results.xlsx') as writer:
+    pd.DataFrame(data=((acl_removed + lcl_removed)[0:years])).to_excel(writer, sheet_name='Cash Flows per Simulation')
+    pd.DataFrame(data=np.array(HS.market_rates_list)).to_excel(writer, sheet_name='Interest Rate Paths')
+    products_df.to_excel(writer, sheet_name='Product Allocation')
+    results_df.to_excel(writer, sheet_name='Results')
+
 """
 # Plot 4
 ax2 = products_df.groupby(['Product'])['Position size'].sum().plot.pie()
 fig4 = ax2.get_figure()
 fig4.show()
 """
+
 input() # Shows all figures
