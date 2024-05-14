@@ -2,6 +2,7 @@ import numpy as np
 
 class VariableCouponBond:
     def __init__(self, start_time=0, maturity=10, face_value=1, price=1):
+        self.name = "Variable rate coupon"
         self.start_time = start_time
         self.maturity = maturity
         self.face_value = face_value

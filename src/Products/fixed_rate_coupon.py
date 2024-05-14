@@ -2,6 +2,7 @@ import numpy as np
 
 class FixedCouponBond:
     def __init__(self, coupon, start_time=0, maturity=10, face_value=1, price=1):
+        self.name = "Fixed coupon bond"
         self.coupon = coupon
         self.start_time = start_time
         self.maturity = maturity
@@ -18,6 +19,7 @@ class FixedCouponBond:
     def calculate_npv(self, spot_rates):
         cash_flows = self.calculate_payoff(self.maturity)
         times = np.arange(len(cash_flows))
+        #print(spot_rates[self.maturity])
         pvs = cash_flows / ((1 + spot_rates[self.maturity]) ** times)
         npv = np.sum(pvs[1:]) # t=0 not included
         self.price = npv # update price
